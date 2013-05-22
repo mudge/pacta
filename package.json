@@ -1,0 +1,15 @@
+{
+    "name": "pacta",
+    "description": "An extremely minimal Promises implementation.",
+    "homepage": "https://github.com/mudge/pacta",
+    "author": "Paul Mucur (http://mudge.name)",
+    "keywords": ["promises"],
+    "version": "0.0.0",
+    "main": "./lib/pacta.js",
+    "devDependencies": { "mocha": "1.10.0" },
+    "scripts": { "test": "mocha" },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mudge/pacta.git"
+    }
+}
