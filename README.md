@@ -14,7 +14,7 @@ Pacta's promises can be used as the following algebraic structures:
 * [Chains](https://github.com/puffnfresh/fantasy-land#chain);
 * [Monads](https://github.com/puffnfresh/fantasy-land#monad).
 
-Note that Pacta does not handle errors or the concept of a failed promises as
+Note that Pacta does not handle errors or the concept of a failed promise as
 yet.
 
 See [the test
