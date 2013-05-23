@@ -1,4 +1,4 @@
-# pacta
+# pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 This is an in-progress experiment to explore Promises in
 [node.js](http://nodejs.org) having been convinced by [James
