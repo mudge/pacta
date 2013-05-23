@@ -71,7 +71,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils part 1 of https://github.com/puffnfresh/fantasy-land#functor', function (done) {
+        it('fulfils the identity property of a functor', function (done) {
             p.map(function (x) {
                 return x;
             }).map(function (x) {
@@ -80,7 +80,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils part 2 of https://github.com/puffnfresh/fantasy-land#functor', function (done) {
+        it('fulfils the composition property of a functor #1', function (done) {
             var f = function (x) { return 'f(' + x + ')'; },
                 g = function (x) { return 'g(' + x + ')'; };
 
@@ -90,7 +90,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils part 2 of https://github.com/puffnfresh/fantasy-land#functor', function (done) {
+        it('fulfils the composition property of a functor #2', function (done) {
             var f = function (x) { return 'f(' + x + ')'; },
                 g = function (x) { return 'g(' + x + ')'; };
 
@@ -102,19 +102,27 @@ describe('Promise', function () {
     });
 
     describe('#concat', function () {
-        it('returns a new promise composed of the two', function (done) {
-            p.concat(p2).concat(p3).concat(p4).map(function (x, y, z, a) {
+        it('fulfils the associativity property of semigroups #1', function (done) {
+            p.concat(p2).concat(p3).map(function (x, y, z) {
                 assert.equal('foo', x);
                 assert.equal('bar', y);
                 assert.equal('baz', z);
-                assert.equal('quux', a);
+                done();
+            });
+        });
+
+        it('fulfils the associativity property of semigroups #2', function (done) {
+            p.concat(p2.concat(p3)).map(function (x, y, z) {
+                assert.equal('foo', x);
+                assert.equal('bar', y);
+                assert.equal('baz', z);
                 done();
             });
         });
     });
 
     describe('#chain', function () {
-        it('fulfils https://github.com/puffnfresh/fantasy-land#chain', function (done) {
+        it('fulfils the associativity property of chain #1', function (done) {
             var f = function (x) { return Promise.of('f(' + x + ')'); },
                 g = function (x) { return Promise.of('g(' + x + ')'); };
 
@@ -124,7 +132,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#chain', function (done) {
+        it('fulfils the associativity property of chain #2', function (done) {
             var f = function (x) { return Promise.of('f(' + x + ')'); },
                 g = function (x) { return Promise.of('g(' + x + ')'); };
 
@@ -136,14 +144,14 @@ describe('Promise', function () {
     });
 
     describe('#ap', function () {
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the identity property of applicative', function (done) {
             Promise.of(function (a) { return a; }).ap(p).map(function (x) {
                 assert.equal('foo', x);
                 done();
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the composition property of applicative #1', function (done) {
             var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
                 v = Promise.of(function (x) { return 'v(' + x + ')'; }),
                 w = Promise.of('foo');
@@ -160,7 +168,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the composition property of applicative #2', function (done) {
             var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
                 v = Promise.of(function (x) { return 'v(' + x + ')'; }),
                 w = Promise.of('foo');
@@ -171,7 +179,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the homomorphism property of applicative #1', function (done) {
             var f = function (x) { return 'f(' + x + ')'; };
 
             Promise.of(f).ap(Promise.of('foo')).map(function (x) {
@@ -180,7 +188,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the homomorphism property of applicative #2', function (done) {
             var f = function (x) { return 'f(' + x + ')'; };
 
             Promise.of(f('foo')).map(function (x) {
@@ -189,7 +197,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the interchange property of applicative #1', function (done) {
             var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
                 y = 'y';
 
@@ -199,7 +207,7 @@ describe('Promise', function () {
             });
         });
 
-        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+        it('fulfils the interchange property of applicative #2', function (done) {
             var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
                 y = 'y';
 
@@ -207,6 +215,22 @@ describe('Promise', function () {
                 return f(y);
             }).ap(u).map(function (x) {
                 assert.equal('u(y)', x);
+                done();
+            });
+        });
+    });
+
+    describe('.empty', function () {
+        it('conforms to the right identity', function (done) {
+            p.concat(Promise.empty()).map(function (x) {
+                assert.equal('foo', x);
+                done();
+            });
+        });
+
+        it('conforms to the left identity', function (done) {
+            Promise.empty().concat(p).map(function (x) {
+                assert.equal('foo', x);
                 done();
             });
         });
