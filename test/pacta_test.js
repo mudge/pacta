@@ -134,4 +134,81 @@ describe('Promise', function () {
             });
         });
     });
+
+    describe('#ap', function () {
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            Promise.of(function (a) { return a; }).ap(p).map(function (x) {
+                assert.equal('foo', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
+                v = Promise.of(function (x) { return 'v(' + x + ')'; }),
+                w = Promise.of('foo');
+
+            Promise.of(function (f) {
+                return function (g) {
+                    return function (x) {
+                        return f(g(x));
+                    };
+                };
+            }).ap(u).ap(v).ap(w).map(function (x) {
+                assert.equal('u(v(foo))', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
+                v = Promise.of(function (x) { return 'v(' + x + ')'; }),
+                w = Promise.of('foo');
+
+            u.ap(v.ap(w)).map(function (x) {
+                assert.equal('u(v(foo))', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            var f = function (x) { return 'f(' + x + ')'; };
+
+            Promise.of(f).ap(Promise.of('foo')).map(function (x) {
+                assert.equal('f(foo)', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            var f = function (x) { return 'f(' + x + ')'; };
+
+            Promise.of(f('foo')).map(function (x) {
+                assert.equal('f(foo)', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
+                y = 'y';
+
+            u.ap(Promise.of(y)).map(function (x) {
+                assert.equal('u(y)', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#applicative', function (done) {
+            var u = Promise.of(function (x) { return 'u(' + x + ')'; }),
+                y = 'y';
+
+            Promise.of(function (f) {
+                return f(y);
+            }).ap(u).map(function (x) {
+                assert.equal('u(y)', x);
+                done();
+            });
+        });
+    });
 });
