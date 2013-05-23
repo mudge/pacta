@@ -93,9 +93,9 @@ describe('Promise', function () {
         });
     });
 
-    describe('#juxt', function () {
+    describe('#concat', function () {
         it('returns a new promise composed of the two', function (done) {
-            p.juxt(p2).juxt(p3).juxt(p4).map(function (x, y, z, a) {
+            p.concat(p2).concat(p3).concat(p4).map(function (x, y, z, a) {
                 assert.equal('foo', x);
                 assert.equal('bar', y);
                 assert.equal('baz', z);

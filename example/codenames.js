@@ -22,7 +22,7 @@ var random = function (coll) {
 
 var promisedPrefixes = promisedJSON('http://codenames.clivemurray.com/data/prefixes.json'),
     promisedAnimals = promisedJSON('http://codenames.clivemurray.com/data/animals.json'),
-    prefixesAndAnimals = promisedPrefixes.juxt(promisedAnimals);
+    prefixesAndAnimals = promisedPrefixes.concat(promisedAnimals);
 
 var promisedCodeName = function () {
     return prefixesAndAnimals.map(function (prefixes, animals) {
