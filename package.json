@@ -12,5 +12,6 @@
         "type": "git",
         "url": "https://github.com/mudge/pacta.git"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "engines": { "node": ">=0.6" }
 }
