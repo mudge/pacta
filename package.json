@@ -1,15 +1,16 @@
 {
     "name": "pacta",
-    "description": "An extremely minimal Promises implementation.",
+    "description": "An algebraic implementation of Promises.",
     "homepage": "https://github.com/mudge/pacta",
     "author": "Paul Mucur (http://mudge.name)",
-    "keywords": ["promises"],
-    "version": "0.0.0",
+    "keywords": ["promises", "monad", "functor"],
+    "version": "0.0.1",
     "main": "./lib/pacta.js",
     "devDependencies": { "mocha": "1.10.0" },
     "scripts": { "test": "mocha" },
     "repository": {
         "type": "git",
         "url": "https://github.com/mudge/pacta.git"
-    }
+    },
+    "license": "MIT"
 }
