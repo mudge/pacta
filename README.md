@@ -5,7 +5,7 @@ This is an in-progress experiment to explore Promises in
 Coglan](http://blog.jcoglan.com/2013/03/30/callbacks-are-imperative-promises-are-functional-nodes-biggest-missed-opportunity/)
 and [Aanand Prasad](http://aanandprasad.com/articles/negronis/).
 
-At the moment, pacta's promises are [semigroups](https://github.com/puffnfresh/fantasy-land#semigroup) and [functors](https://github.com/puffnfresh/fantasy-land#functor) (providing only `map` and `concat`).
+At the moment, pacta's promises are [semigroups](https://github.com/puffnfresh/fantasy-land#semigroup), [functors](https://github.com/puffnfresh/fantasy-land#functor) and [chains](https://github.com/puffnfresh/fantasy-land#chain) (providing only `map`, `concat` and `chain`).
 
 ## Usage
 

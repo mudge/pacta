@@ -23,6 +23,14 @@ describe('Promise', function () {
         p4 = new Promise('quux');
     });
 
+    describe('.of', function () {
+        it('wraps a value in a new promise', function () {
+            Promise.of(1).map(function (x) {
+                assert.equal(1, x);
+            });
+        });
+    });
+
     describe('#map', function () {
         it('yields the value of the promise', function (done) {
             p.map(function (x) {
@@ -100,6 +108,28 @@ describe('Promise', function () {
                 assert.equal('bar', y);
                 assert.equal('baz', z);
                 assert.equal('quux', a);
+                done();
+            });
+        });
+    });
+
+    describe('#chain', function () {
+        it('fulfils https://github.com/puffnfresh/fantasy-land#chain', function (done) {
+            var f = function (x) { return Promise.of('f(' + x + ')'); },
+                g = function (x) { return Promise.of('g(' + x + ')'); };
+
+            p.chain(f).chain(g).map(function (x) {
+                assert.equal('g(f(foo))', x);
+                done();
+            });
+        });
+
+        it('fulfils https://github.com/puffnfresh/fantasy-land#chain', function (done) {
+            var f = function (x) { return Promise.of('f(' + x + ')'); },
+                g = function (x) { return Promise.of('g(' + x + ')'); };
+
+            p.chain(function (x) { return f(x).chain(g); }).map(function (x) {
+                assert.equal('g(f(foo))', x);
                 done();
             });
         });
