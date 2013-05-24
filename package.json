@@ -6,6 +6,7 @@
     "keywords": ["promises", "monad", "functor"],
     "version": "0.0.1",
     "main": "./lib/pacta.js",
+    "dependencies": {},
     "devDependencies": { "mocha": "1.10.0" },
     "scripts": { "test": "mocha" },
     "repository": {
