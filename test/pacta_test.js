@@ -20,7 +20,7 @@ describe('Promise', function () {
             p3.resolve('baz');
         }, 75);
 
-        p4 = new Promise('quux');
+        p4 = Promise.of('quux');
     });
 
     describe('.of', function () {
@@ -103,19 +103,40 @@ describe('Promise', function () {
 
     describe('#concat', function () {
         it('fulfils the associativity property of semigroups #1', function (done) {
-            p.concat(p2).concat(p3).map(function (x, y, z) {
-                assert.equal('foo', x);
-                assert.equal('bar', y);
-                assert.equal('baz', z);
+            var p = Promise.of([1]),
+                p2 = Promise.of([2]),
+                p3 = Promise.of([3]);
+
+            p.concat(p2).concat(p3).map(function (x) {
+                assert.equal(1, x[0]);
+                assert.equal(2, x[1]);
+                assert.equal(3, x[2]);
                 done();
             });
         });
 
         it('fulfils the associativity property of semigroups #2', function (done) {
-            p.concat(p2.concat(p3)).map(function (x, y, z) {
-                assert.equal('foo', x);
-                assert.equal('bar', y);
-                assert.equal('baz', z);
+            var p = Promise.of([1]),
+                p2 = Promise.of([2]),
+                p3 = Promise.of([3]);
+
+            p.concat(p2.concat(p3)).map(function (x) {
+                assert.equal(1, x[0]);
+                assert.equal(2, x[1]);
+                assert.equal(3, x[2]);
+                done();
+            });
+        });
+
+        it('fulfils the identity of a semigroup', function (done) {
+            var p = Promise.of([1]),
+                p2 = Promise.of([2]),
+                p3 = Promise.of([3]);
+
+            p.concat(p2).concat(p3).map(function (x) {
+                return x;
+            }).map(function (x) {
+                assert.deepEqual([1, 2, 3], x);
                 done();
             });
         });
@@ -220,17 +241,21 @@ describe('Promise', function () {
         });
     });
 
-    describe('.empty', function () {
+    describe('#empty', function () {
         it('conforms to the right identity', function (done) {
-            p.concat(Promise.empty()).map(function (x) {
-                assert.equal('foo', x);
+            var p = Promise.of([1]);
+
+            p.concat(p.empty()).map(function (x) {
+                assert.deepEqual([1], x);
                 done();
             });
         });
 
         it('conforms to the left identity', function (done) {
-            Promise.empty().concat(p).map(function (x) {
-                assert.equal('foo', x);
+            var p = Promise.of([1]);
+
+            p.empty().concat(p).map(function (x) {
+                assert.deepEqual([1], x);
                 done();
             });
         });

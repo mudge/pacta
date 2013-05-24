@@ -31,22 +31,20 @@ setTimeout(function () {
   p.resolve('Foo');
 }, 1000);
 
-var p2 = new Promise();
-setTimeout(function () {
-  p2.resolve('bar');
-}, 500);
-
-var p3 = Promise.of('baz');
-
 p.map(console.log); //=> "Foo"
 
 p.map(function (x) {
   return x + '!';
 }).map(console.log); //=> "Foo!"
 
-p.concat(p2).concat(p3).map(function (x, y, z) {
-  console.log('p says: ' + x);  //=> "p says: Foo"
-  console.log('p2 says: ' + y); //=> "p2 says: bar"
-  console.log('p3 says: ' + z); //=> "p3 says: baz"
+var p2 = new Promise();
+setTimeout(function () {
+  p2.resolve(['bar']);
+}, 500);
+
+var p3 = Promise.of(['baz']);
+
+p2.concat(p3).map(function (x) {
+  console.log(x); //=> [ bar baz ]
 });
 ```
