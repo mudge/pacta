@@ -121,7 +121,7 @@ var promise = new Promise();
 ```
 
 Create a new, unfulfilled promise that will eventually be populated with a
-value (through `resolve`).
+value (through [`resolve`](#promiseresolvex)).
 
 ### `Promise.of(x)`
 
@@ -189,7 +189,8 @@ Its type signature is:
 concat :: Promise a -> Promise a -> Promise a
 ```
 
-See also `Promise#conjoin` and `Promise#append`.
+See also [`Promise#conjoin`](#promiseconjoinp) and
+[`Promise#append`](#promiseappendp).
 
 ### `Promise#chain(f)`
 
@@ -200,7 +201,8 @@ promise.chain(function (x) { return Promise.of(x * 2); }); //=> Promise.of(4)
 ```
 
 Execute a function `f` with the value of the promise. This differs from
-`Promise#map` in that the function *must* return a promise itself.
+[`Promise#map`](#promisemapf) in that the function *must* return a promise
+itself.
 
 Its type signature is:
 
@@ -238,6 +240,8 @@ On a promise containing a monoid (viz. something with an `empty()` function on
 itself or its constructor like `Array` or `String`), return a new promise with
 an empty version of the initial value.
 
+(Pacta ships with Monoid implementations for `Array` and `String` by default.)
+
 ### `Promise#conjoin(p)`
 
 ```javascript
@@ -248,8 +252,9 @@ promise.conjoin(promise2); //=> Promise.of([1, 2, 3])
 ```
 
 Conjoin the promise with another promise `p`, converting their values to
-arrays if needed (e.g. `'foo'` into `['foo']`). This differs from `concat`
-which only works on promises of values that are semigroups themselves.
+arrays if needed (e.g. `'foo'` into `['foo']`). This differs from
+[`Promise#concat`](#promiseconcatp) which only works on promises of values
+that are semigroups themselves.
 
 All values are coerced to arrays using `[].concat`.
 
@@ -263,12 +268,12 @@ promise.append(promise2); //=> Promise.of([[1]])
 ```
 
 On a promise of a list, append another promise `p`'s value to it without
-joining (e.g. appending `[1]` to `[]` results in `[[1]]` rather than `[1]` as
-it would with `concat` and `conjoin`).
+joining (e.g. appending `[1]` to `[]` results in `[[1]]`).
 
 This is particularly useful when dealing with several promises containing
 lists and you want to keep them separated instead of being merged into one as
-would happen with `concat`.
+would happen with [`Promise#concat`](#promiseconcatp) and
+[`Promise#conjoin`](#promiseconjoinp).
 
 ### `Promise#spread(f)`
 
@@ -280,9 +285,9 @@ promise.spread(function (x, y) {
 }); //=> Promise.of(3)
 ```
 
-Similar to `map`, apply a function `f` to a promise of a list but, instead
-of receiving a single argument, pass each value of the list to the function
-separately.
+Similar to [`Promise#map`](#promisemapf), apply a function `f` to a promise of
+a list but, instead of receiving a single argument, pass each value of the
+list to the function separately.
 
 ## Acknowledgements
 
