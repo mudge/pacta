@@ -1,27 +1,25 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 This is an implementation of algebraic Promises in
-[node.js](http://nodejs.org) (having been convinced by [James
-Coglan](http://blog.jcoglan.com/2013/03/30/callbacks-are-imperative-promises-are-functional-nodes-biggest-missed-opportunity/)
-and [Aanand Prasad](http://aanandprasad.com/articles/negronis/)).
+[node.js](http://nodejs.org).
 
 Promises can be thought of as objects representing a value that may not have
-been calculated yet (similar to the [Maybe
-monad][Maybe]). An obvious example is that of the result of an asynchronous HTTP request: it's
-not clear *when* the request will be fulfilled but it will be at some point in
-the future. Having an actual Promise object representing this eventual values
-allows you to compose, transform and act on them without worrying about their
-time of execution.
+been calculated yet (similar to the [Maybe monad][Maybe]). An obvious example
+is the result of an asynchronous HTTP request: it's not clear *when*
+the request will be fulfilled but it will be at some point in the future.
+Having actual Promise objects representing these eventual values allows you
+to compose, transform and act on them without worrying about their time or
+sequence of execution.
 
 For a worked example of this, see the
 [two](https://github.com/mudge/pacta/blob/master/example/codenames.js)
-[examples](https://github.com/mudge/pacta/blob/master/example/codenames-2.js)
+[example programs](https://github.com/mudge/pacta/blob/master/example/codenames-2.js)
 and [sample HTTP
 client](https://github.com/mudge/pacta/blob/master/example/promised-http.js)
 included in Pacta.
 
 Pacta's promises can be used as the following algebraic structures as defined
-in the [Fantasty Land
+in the [Fantasy Land
 Specification](https://github.com/puffnfresh/fantasy-land):
 
 * [Semigroups](https://github.com/puffnfresh/fantasy-land#semigroup) (through
@@ -41,17 +39,17 @@ Specification](https://github.com/puffnfresh/fantasy-land):
 Above that, Pacta also provides the following functions for creating and
 working with Promises of lists:
 
-* `conjoin` to concatenate promises into a list of values regardless of their
-  original type meaning that non-Monoid types can be combined with others
-  (e.g. a promise of `'foo'` can be conjoined with `[1, 2]` to produce
+* `Promise#conjoin` to concatenate promises into a list of values regardless
+  of their original type meaning that non-Monoid types can be combined with
+  others (e.g. a promise of `'foo'` can be conjoined with `[1, 2]` to produce
   `['foo', 1, 2]`);
-* `append` to append promises to an initial promise of a list. This means that
-  you can work more easily with multiple promises of lists without joining
-  them together (as would be done with `concat` and `conjoin`), e.g. appending
-  a promise of `[2, 3]` to a promise of `[1]` results in `[1, [2, 3]]` rather
-  than `[1, 2, 3]`);
-* `spread` to map over a promise's value but, instead of receiving a single
-  value, spread the promise's value across separate arguments:
+* `Promise#append` to append promises to an initial promise of a list. This
+  means that you can work more easily with multiple promises of lists without
+  joining them together (as would be done with `concat` and `conjoin`), e.g.
+  appending a promise of `[2, 3]` to a promise of `[1]` results in `[1, [2,
+  3]]` rather than `[1, 2, 3]`);
+* `Promise#spread` to map over a promise's value but, instead of receiving a
+  single value, spread the promise's value across separate arguments:
 
 ```javascript
 Promise.of([1, 2]).spread(function (x, y) {
@@ -192,6 +190,10 @@ var promise = Promise.of(2);
 promise.chain(function (x) { return Promise.of(x * 2); }); //=> Promise.of(4)
 ```
 
+Execute a given function that returns a new promise against a promise. This
+differs from `Promise#map` in that the function *must* return a promise
+itself.
+
 ### Promise#ap
 
 ```javascript
@@ -201,6 +203,9 @@ var promise = Promise.of(function (x) { return x * 2; }),
 promise.ap(promise2); //=> Promise.of(4)
 ```
 
+On a promise containing a function, call that function with a promise
+containing a value.
+
 ### Promise#empty
 
 ```javascript
@@ -208,6 +213,10 @@ var promise = Promise.of('woo');
 
 promise.empty(); //=> Promise.of('')
 ```
+
+On a promise containing a monoid (viz. something with an `empty()` function on
+itself or its constructor like `Array` or `String`), return a new promise with
+an empty version of the initial value.
 
 ### Promise#conjoin
 
@@ -218,6 +227,9 @@ var promise = Promise.of(1),
 promise.conjoin(promise2); //=> Promise.of([1, 2, 3])
 ```
 
+Conjoin two promises together, converting their values to arrays if needed
+(e.g. `'foo'` into `['foo']`).
+
 ### Promise#append
 
 ```javascript
@@ -226,6 +238,10 @@ var promise = Promise.of([]),
 
 promise.append(promise2); //=> Promise.of([[1]])
 ```
+
+On a promise of a list, append another promise's value to it without joining
+(e.g. appending `[1]` to `[]` results in `[[1]]` rather than `[1]` as it would
+with `concat` and `conjoin`).
 
 ### Promise#spread
 
@@ -236,6 +252,19 @@ promise.spread(function (x, y) {
   return x + y;
 }); //=> Promise.of(3)
 ```
+
+Similar to `map`, apply a given function to a promise of a list but, instead
+of receiving a single argument, pass each value of the list to the function
+separately.
+
+## Acknowledgements
+
+[James
+Coglan](http://blog.jcoglan.com/2013/03/30/callbacks-are-imperative-promises-are-functional-nodes-biggest-missed-opportunity/)
+and [Aanand Prasad](http://aanandprasad.com/articles/negronis/) convinced me
+to explore the idea of monadic promises and [Brian McKenna's "Fantasy Land"
+specification](https://github.com/puffnfresh/fantasy-land) and
+[feedback](https://github.com/mudge/pacta/issues/1) were essential.
 
 ## License
 
