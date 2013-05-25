@@ -138,6 +138,15 @@ var promise = Promise.of('foo');
 
 Create a new, fulfilled promise already populated with a value.
 
+### Promise#resolve
+
+```javascript
+var promise = new Promise();
+promise.resolve(5);
+```
+
+Populate a promise with its final value thereby resolving it.
+
 ### Promise#map
 
 ```javascript
