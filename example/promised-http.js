@@ -1,10 +1,10 @@
 var http = require('http'),
     Promise = require('../lib/pacta').Promise;
 
-var get = function (url) {
+var get = function (options) {
     var promise = new Promise();
 
-    http.get(url, function (res) {
+    http.get(options, function (res) {
         var body = '';
 
         res.on('data', function (chunk) {
@@ -19,8 +19,8 @@ var get = function (url) {
     return promise;
 };
 
-var getJSON = function (url) {
-    return get(url).map(JSON.parse);
+var getJSON = function (options) {
+    return get(options).map(JSON.parse);
 };
 
 exports.get = get;

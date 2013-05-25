@@ -354,6 +354,30 @@ describe('Promise', function () {
             });
         });
     });
+
+    describe('#reduce', function () {
+        it('returns a new promise with the result', function (done) {
+            var p = Promise.of([[1], [2], [3]]);
+
+            p.reduce(function (acc, e) {
+                return acc.concat(e);
+            }).map(function (x) {
+                assert.deepEqual([1, 2, 3], x);
+                done();
+            });
+        });
+
+        it('takes an optional initial value', function (done) {
+            var p = Promise.of([1, 2, 3]);
+
+            p.reduce(function (acc, e) {
+                return acc + e;
+            }, 0).map(function (x) {
+                assert.equal(6, x);
+                done();
+            });
+        });
+    });
 });
 
 describe('Array', function () {

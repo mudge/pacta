@@ -48,6 +48,9 @@ working with Promises of lists:
   of lists without joining them together (as would be done with `concat` and
   `conjoin`), e.g.  appending a promise of `[2, 3]` to a promise of `[1]`
   results in `[1, [2, 3]]` rather than `[1, 2, 3]`);
+* [`Promise#reduce`](#promisereducef-initialvalue) to
+  [reduce](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce)
+  a list within a promise;
 * [`Promise#spread`](#promisespreadf) to map over a promise's value but,
   instead of receiving a single value, spread the promise's value across
   separate arguments:
@@ -274,6 +277,22 @@ This is particularly useful when dealing with several promises containing
 lists and you want to keep them separated instead of being merged into one as
 would happen with [`Promise#concat`](#promiseconcatp) and
 [`Promise#conjoin`](#promiseconjoinp).
+
+### `Promise#reduce(f[, initialValue])`
+
+```javascript
+var promise = Promise.of([1, 2, 3]);
+
+promise.reduce(function (acc, e) {
+  return acc + e;
+}, 0); //=> Promise.of(6)
+```
+
+On a promise containing an array,
+[reduce](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce)
+its value, returning a promise of the resulting value. This defers to the
+underlying signature of `reduce` taking a function `f` and an optional
+`initialValue`.
 
 ### `Promise#spread(f)`
 
