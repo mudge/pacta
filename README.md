@@ -116,3 +116,119 @@ p2.append(p).explode(function (x, y) {
   console.log(y); //=> 'Foo'
 });
 ```
+
+## API
+
+### Promise
+
+```javascript
+var promise = new Promise();
+```
+
+Create a new, unfulfilled promise that will eventually be populated with a
+value (through `resolve`).
+
+### Promise.of
+
+```javascript
+var promise = Promise.of(1);
+var promise = Promise.of('foo');
+```
+
+Create a new, fulfilled promise already populated with a value.
+
+### Promise#map
+
+```javascript
+var promise = Promise.of(2);
+
+promise.map(function (x) {
+  console.log(x);
+
+  return x * 2;
+}); //=> Promise.of(4)
+```
+
+Execute a function on the contents of the promise. This returns a new promise
+of the result of the given function being executed.
+
+Note that this is the primary way of acting on the value of a promise: you can
+use side-effects within your given function (e.g. `console.log`) as well as
+modifying the value and returning it.
+
+### Promise#concat
+
+```javascript
+var promise = Promise.of('foo'),
+    promise2 = Promise.of('bar');
+
+promise.concat(promise2); //=> Promise.of('foobar')
+```
+
+Concatenate two promises into a single promise of both values concatenated
+together. This will work for any promise containing a semigroup (viz. a value
+that supports `concat`) such as `String` or `Array`. Note that [`concat`'s
+usual
+behaviour](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/concat)
+of joining arrays, etc. applies.
+
+See also `Promise#conjoin` and `Promise#append`.
+
+### Promise#chain
+
+```javascript
+var promise = Promise.of(2);
+
+promise.chain(function (x) { return Promise.of(x * 2); }); //=> Promise.of(4)
+```
+
+### Promise#ap
+
+```javascript
+var promise = Promise.of(function (x) { return x * 2; }),
+    promise2 = Promise.of(2);
+
+promise.ap(promise2); //=> Promise.of(4)
+```
+
+### Promise#empty
+
+```javascript
+var promise = Promise.of('woo');
+
+promise.empty(); //=> Promise.of('')
+```
+
+### Promise#conjoin
+
+```javascript
+var promise = Promise.of(1),
+    promise2 = Promise.of([2, 3]);
+
+promise.conjoin(promise2); //=> Promise.of([1, 2, 3])
+```
+
+### Promise#append
+
+```javascript
+var promise = Promise.of([]),
+    promise2 = Promise.of([1]);
+
+promise.append(promise2); //=> Promise.of([[1]])
+```
+
+### Promise#spread
+
+```javascript
+var promise = Promise.of([1, 2]);
+
+promise.spread(function (x, y) {
+  return x + y;
+}); //=> Promise.of(3)
+```
+
+## License
+
+Copyright © 2013 Paul Mucur.
+
+Distributed under the MIT License.
