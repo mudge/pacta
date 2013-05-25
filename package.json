@@ -4,7 +4,7 @@
     "homepage": "https://github.com/mudge/pacta",
     "author": "Paul Mucur (http://mudge.name)",
     "keywords": ["promises", "monad", "functor"],
-    "version": "0.0.2",
+    "version": "0.0.3",
     "main": "./lib/pacta.js",
     "dependencies": {},
     "devDependencies": { "mocha": "1.10.0" },

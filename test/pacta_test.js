@@ -297,39 +297,45 @@ describe('Promise', function () {
         });
     });
 
-    describe('#combine', function () {
-        it('conjoins promises without flattening lists', function (done) {
+    describe('#append', function () {
+        it('appends promises to a promise of an array', function (done) {
             var p = Promise.of([1]),
-                p2 = Promise.of([2, 3]);
+                p2 = Promise.of(2);
 
-            p.combine(p2).map(function (x) {
-                assert.deepEqual([[1], [2, 3]], x);
+            p.append(p2).map(function (x) {
+                assert.deepEqual([1, 2], x);
                 done();
             });
         });
 
-        it('conjoins non-list promises', function (done) {
-            p.combine(p2).map(function (x) {
-                assert.deepEqual(['foo', 'bar'], x);
+        it('appends promises of arrays to arrays without joining them', function (done) {
+            var p = Promise.of([1]),
+                p2 = Promise.of([2]);
+
+            p.append(p2).map(function (x) {
+                assert.deepEqual([1, [2]], x);
                 done();
             });
         });
 
-        it('conjoins both list and non-list promises', function (done) {
-            var p2 = Promise.of([2, 3]);
+        it('can be chained without nesting arrays', function (done) {
+            var p = Promise.of([]),
+                p2 = Promise.of([1]),
+                p3 = Promise.of([2, 3]),
+                p4 = Promise.of([4]);
 
-            p.combine(p2).map(function (x) {
-                assert.deepEqual(['foo', [2, 3]], x);
+            p.append(p2).append(p3).append(p4).map(function (x) {
+                assert.deepEqual([[1], [2, 3], [4]], x);
                 done();
             });
         });
     });
 
-    describe('#explode', function () {
+    describe('#spread', function () {
         it('calls the given function with each value of the Promise', function (done) {
             var p = Promise.of([1, 2, 3]);
 
-            p.explode(function (x, y, z) {
+            p.spread(function (x, y, z) {
                 assert.equal(1, x);
                 assert.equal(2, y);
                 assert.equal(3, z);
@@ -340,7 +346,7 @@ describe('Promise', function () {
         it('returns a promise with a single value', function (done) {
             var p = Promise.of([1, 2, 3]);
 
-            p.explode(function (x, y, z) {
+            p.spread(function (x, y, z) {
                 return x + y + z;
             }).map(function (x) {
                 assert.equal(6, x);
