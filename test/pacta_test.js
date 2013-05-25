@@ -140,6 +140,13 @@ describe('Promise', function () {
                 done();
             });
         });
+
+        it('concatenates any monoid including strings', function (done) {
+            p.concat(p2).concat(p3).map(function (x) {
+                assert.equal('foobarbaz', x);
+                done();
+            });
+        });
     });
 
     describe('#chain', function () {
@@ -259,5 +266,98 @@ describe('Promise', function () {
                 done();
             });
         });
+    });
+
+    describe('#conjoin', function () {
+        it('concatenates values into a list regardless of type', function (done) {
+            p.conjoin(p2).conjoin(p3).map(function (x) {
+                assert.deepEqual(['foo', 'bar', 'baz'], x);
+                done();
+            });
+        });
+
+        it('concatenates values into a list even if already a list', function (done) {
+            var p = Promise.of([1]),
+                p2 = Promise.of([2, 3]),
+                p3 = Promise.of([4]);
+
+            p.conjoin(p2).conjoin(p3).map(function (x) {
+                assert.deepEqual([1, 2, 3, 4], x);
+                done();
+            });
+        });
+
+        it('concatenates values of mixed types', function (done) {
+            var p2 = Promise.of([2, 3]);
+
+            p.conjoin(p2).map(function (x) {
+                assert.deepEqual(['foo', 2, 3], x);
+                done();
+            });
+        });
+    });
+
+    describe('#combine', function () {
+        it('conjoins promises without flattening lists', function (done) {
+            var p = Promise.of([1]),
+                p2 = Promise.of([2, 3]);
+
+            p.combine(p2).map(function (x) {
+                assert.deepEqual([[1], [2, 3]], x);
+                done();
+            });
+        });
+
+        it('conjoins non-list promises', function (done) {
+            p.combine(p2).map(function (x) {
+                assert.deepEqual(['foo', 'bar'], x);
+                done();
+            });
+        });
+
+        it('conjoins both list and non-list promises', function (done) {
+            var p2 = Promise.of([2, 3]);
+
+            p.combine(p2).map(function (x) {
+                assert.deepEqual(['foo', [2, 3]], x);
+                done();
+            });
+        });
+    });
+
+    describe('#explode', function () {
+        it('calls the given function with each value of the Promise', function (done) {
+            var p = Promise.of([1, 2, 3]);
+
+            p.explode(function (x, y, z) {
+                assert.equal(1, x);
+                assert.equal(2, y);
+                assert.equal(3, z);
+                done();
+            });
+        });
+
+        it('returns a promise with a single value', function (done) {
+            var p = Promise.of([1, 2, 3]);
+
+            p.explode(function (x, y, z) {
+                return x + y + z;
+            }).map(function (x) {
+                assert.equal(6, x);
+                done();
+            });
+        });
+    });
+});
+
+describe('Array', function () {
+    describe('.empty', function () {
+        assert.deepEqual([], Array.empty());
+    });
+});
+
+describe('String', function () {
+    describe('.empty', function () {
+        assert.equal('', String.empty());
     });
 });
