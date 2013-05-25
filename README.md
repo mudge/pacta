@@ -7,8 +7,7 @@ and [Aanand Prasad](http://aanandprasad.com/articles/negronis/)).
 
 Promises can be thought of as objects representing a value that may not have
 been calculated yet (similar to the [Maybe
-monad](https://en.wikipedia.org/wiki/Monad_(functional_programming)#The_Maybe_monad)).
-An obvious example is that of the result of an asynchronous HTTP request: it's
+monad][Maybe]). An obvious example is that of the result of an asynchronous HTTP request: it's
 not clear *when* the request will be fulfilled but it will be at some point in
 the future. Having an actual Promise object representing this eventual values
 allows you to compose, transform and act on them without worrying about their
@@ -75,6 +74,8 @@ yet.
 See [the test
 suite](https://github.com/mudge/pacta/blob/master/test/pacta_test.js) for more
 information.
+
+[Maybe]: https://en.wikipedia.org/wiki/Monad_(functional_programming)#The_Maybe_monad
 
 ## Usage
 
@@ -232,3 +233,4 @@ promise.spread(function (x, y) {
 Copyright © 2013 Paul Mucur.
 
 Distributed under the MIT License.
+
