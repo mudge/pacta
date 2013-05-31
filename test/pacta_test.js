@@ -24,9 +24,33 @@ describe('Promise', function () {
     });
 
     describe('.of', function () {
-        it('wraps a value in a new promise', function () {
+        it('wraps a value in a new promise', function (done) {
             Promise.of(1).map(function (x) {
                 assert.equal(1, x);
+                done();
+            });
+        });
+    });
+
+    describe('.wrap', function () {
+        it('wraps a value in a new promise', function (done) {
+            Promise.wrap(1).map(function (x) {
+                assert.equal(1, x);
+                done();
+            });
+        });
+
+        it('does not wrap an existing promise', function (done) {
+            Promise.wrap(Promise.of(1)).map(function (x) {
+                assert.equal(1, x);
+                done();
+            });
+        });
+
+        it('wraps undefined in an empty promise', function (done) {
+            Promise.wrap(undefined).map(function (x) {
+                assert.equal(undefined, x);
+                done();
             });
         });
     });
@@ -96,6 +120,33 @@ describe('Promise', function () {
 
             p.map(g).map(f).map(function (x) {
                 assert.equal('f(g(foo))', x);
+                done();
+            });
+        });
+    });
+
+    describe('#then', function () {
+        it('yields its value like #map', function (done) {
+            p.then(function (x) {
+                assert.equal('foo', x);
+                done();
+            });
+        });
+
+        it('can be chained when returning a value', function (done) {
+            p.then(function (x) {
+                return x + '!';
+            }).then(function (x) {
+                assert.equal('foo!', x);
+                done();
+            });
+        });
+
+        it('does not wrap a promise in a promise', function (done) {
+            p.then(function (x) {
+                return Promise.of(x);
+            }).map(function (x) {
+                assert.equal('foo', x);
                 done();
             });
         });
