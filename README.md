@@ -424,6 +424,8 @@ to explore the idea of monadic promises and [Brian McKenna's "Fantasy Land"
 specification](https://github.com/puffnfresh/fantasy-land) and
 [feedback](https://github.com/mudge/pacta/issues/1) were essential.
 
+[![Fantasy Land](images/fantasy-land.png)][Fantasy Land] [![Promises/A+](images/promises-aplus.png)][A+]
+
 ## License
 
 Copyright © 2013 Paul Mucur.
