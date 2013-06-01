@@ -238,7 +238,7 @@ use side-effects within your given function (e.g. `console.log`) as well as
 modifying the value and returning it in order to affect the returning
 promise.
 
-### `Promise#then(onFulfilled, onRejected)`
+### `Promise#then([onFulfilled[, onRejected]])`
 
 ```javascript
 promise.then(function (value) {
