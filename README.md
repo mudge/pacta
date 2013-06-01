@@ -43,7 +43,8 @@ specification](http://promises-aplus.github.io/promises-spec), providing
 partial implementations of the following:
 
 * [The `then`
-  method](http://promises-aplus.github.io/promises-spec/#the__method).
+  method](http://promises-aplus.github.io/promises-spec/#the__method) (through
+  [`Promise#then`](#promisethenonfulfilled)).
 
 As well as above, Pacta also provides the following functions for creating and
 working with Promises of lists:
@@ -213,7 +214,13 @@ method](http://promises-aplus.github.io/promises-spec/#the__method) similar to
 [`Promise#map`](#promisemapf).
 
 Note that, unlike `map`, `then` will always return a promise of a value: it is
-not possible to return a promise of a promise as per the specification.
+not possible to return a promise of a promise as per the specification. Its
+type signature is:
+
+```haskell
+then :: Promise a -> (a -> b)         -> Promise b
+then :: Promise a -> (a -> Promise b) -> Promise b
+```
 
 As Pacta does not yet support promise rejection or errors, this is not fully
 compliant yet.
