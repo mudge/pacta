@@ -1,7 +1,9 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 This is an implementation of algebraic Promises in
-[node.js](http://nodejs.org).
+[node.js](http://nodejs.org). (With
+[Promises/A+](http://promises-aplus.github.io/promises-spec) compliance in
+progress.)
 
 Promises can be thought of as objects representing a value that may not have
 been calculated yet (similar to the [Maybe monad][Maybe]). An obvious example
@@ -35,6 +37,13 @@ Specification](https://github.com/puffnfresh/fantasy-land):
 * [Chains](https://github.com/puffnfresh/fantasy-land#chain) (through [`Promise#chain`](#promisechainf));
 * [Monads](https://github.com/puffnfresh/fantasy-land#monad) (through all of
   the above).
+
+Pacta's promises are also working towards compliance with the [Promises/A+
+specification](http://promises-aplus.github.io/promises-spec), providing
+partial implementations of the following:
+
+* [The `then`
+  method](http://promises-aplus.github.io/promises-spec/#the__method).
 
 As well as above, Pacta also provides the following functions for creating and
 working with Promises of lists:
@@ -135,6 +144,17 @@ var promise = Promise.of('foo');
 
 Create a new, fulfilled promise already populated with a value `x`.
 
+### `Promise.wrap(x)`
+
+```javascript
+var promise = Promise.wrap(1);
+var promise = Promise.wrap(Promise.of('foo'));
+```
+
+Similar to [`Promise#of`](#promiseofx), wrap a value in a promise unless that
+value is already a promise in which case return it directly. It can be seen as
+a way to coerce a value to a promise.
+
 ### `Promise#resolve(x)`
 
 ```javascript
@@ -143,6 +163,8 @@ promise.resolve(5);
 ```
 
 Populate a promise with the value `x` thereby resolving it.
+
+*This function can also be called as `Promise#fulfil`.*
 
 ### `Promise#map(f)`
 
@@ -154,6 +176,10 @@ promise.map(function (x) {
 
   return x * 2;
 }); //=> Promise.of(4)
+
+promise.map(function (x) {
+  return Promise.of(x * 2);
+}); //=> Promise.of(Promise.of(4))
 ```
 
 Execute a function `f` on the contents of the promise. This returns a new
@@ -169,6 +195,28 @@ Note that this is the primary way of acting on the value of a promise: you can
 use side-effects within your given function (e.g. `console.log`) as well as
 modifying the value and returning it in order to affect the returning
 promise.
+
+### `Promise#then(onFulfilled)`
+
+```javascript
+promise.then(function (value) {
+  return x * 2;
+}); //=> Promise.of(4)
+
+promise.then(function (value) {
+  return Promise.of(x * 2);
+}); //=> Promise.of(4)
+```
+
+A partial implementation of the [Promises/A+ `then`
+method](http://promises-aplus.github.io/promises-spec/#the__method) similar to
+[`Promise#map`](#promisemapf).
+
+Note that, unlike `map`, `then` will always return a promise of a value: it is
+not possible to return a promise of a promise as per the specification.
+
+As Pacta does not yet support promise rejection or errors, this is not fully
+compliant yet.
 
 ### `Promise#concat(p)`
 
