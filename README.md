@@ -65,13 +65,14 @@ Specification][Fantasy Land]:
 
 Pacta's promises are compliant with the [Promises/A+
 specification](http://promises-aplus.github.io/promises-spec), providing
-a [`then` method](#promisethenonfulfilledonrejected).
+a [`then` method](#promisethenonfulfilled-onrejected).
 
 Promises are resolved (or fulfilled) with
 [`Promise#resolve`](#promiseresolvex) and rejected with
 [`Promise#rejectreason`](#promiserejectreason).
 
-To execute code on rejection without using `Promise#then`, use
+To execute code on rejection without using
+[`Promise#then`](#promisethenonfulfilled-onrejected), use
 [`Promise#onRejected`](#promiseonrejectedf).
 
 Pacta also provides the following functions for creating and working with
@@ -157,14 +158,14 @@ setTimeout(function () {
 }, 1000);
 
 p4.onRejected(function (reason) {
-  console.error(p4, 'Failed due to', reason);
-});
+  console.error('Failed due to', reason);
+}); //=> Failed due to Error!
 
 p4.then(function (value) {
   console.log('Success!', value);
 }, function (reason) {
   console.error('Failure!', reason);
-})
+}); //=> Failure! Error!
 ```
 
 ## API Documentation
@@ -260,7 +261,8 @@ method](http://promises-aplus.github.io/promises-spec/#the__method), taking an
 optional `onFulfilled` and `onRejected` function to call when the promise is
 fulfilled or rejected respectively.
 
-Like `map`, `then` returns a promise itself and can be chained.
+Like [`Promise#map`](#promisemapf), `then` returns a promise itself and can be
+chained.
 
 ### `Promise#onRejected(f)`
 
