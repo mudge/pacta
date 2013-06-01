@@ -3,7 +3,7 @@
     "description": "An algebraic, Promises/A+ compliant implementation of Promises.",
     "homepage": "https://github.com/mudge/pacta",
     "author": "Paul Mucur (http://mudge.name)",
-    "keywords": ["promises", "monad", "functor"],
+    "keywords": ["promises", "monad", "functor", "promises-aplus"],
     "version": "0.1.0",
     "main": "./lib/pacta.js",
     "dependencies": {},
