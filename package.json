@@ -1,6 +1,6 @@
 {
     "name": "pacta",
-    "description": "An algebraic implementation of Promises.",
+    "description": "An algebraic, Promises/A+ compliant implementation of Promises.",
     "homepage": "https://github.com/mudge/pacta",
     "author": "Paul Mucur (http://mudge.name)",
     "keywords": ["promises", "monad", "functor"],
