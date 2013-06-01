@@ -250,9 +250,9 @@ promise.then(function (value) {
 }); //=> Promise.of(4)
 
 promise.then(function (value) {
-  return console.log('Success!', value);
+  console.log('Success!', value);
 }, function (reason) {
-  return console.error('Error!', reason);
+  console.error('Error!', reason);
 });
 ```
 
