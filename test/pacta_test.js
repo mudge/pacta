@@ -1,5 +1,6 @@
 var assert = require('assert'),
-    Promise = require('../lib/pacta').Promise;
+    Promise = require('../lib/pacta').Promise,
+    adapter = require('./pacta_adapter');
 
 describe('Promise', function () {
     var p, p2, p3, p4;
@@ -32,24 +33,117 @@ describe('Promise', function () {
         });
     });
 
-    describe('.wrap', function () {
-        it('wraps a value in a new promise', function (done) {
-            Promise.wrap(1).map(function (x) {
-                assert.equal(1, x);
-                done();
-            });
+    describe('#state', function () {
+        it('is pending for unfulfilled and unrejected promises', function () {
+            var p = new Promise();
+
+            assert.equal('pending', p.state());
         });
 
-        it('does not wrap an existing promise', function (done) {
-            Promise.wrap(Promise.of(1)).map(function (x) {
-                assert.equal(1, x);
-                done();
-            });
+        it('is fulfilled for fulfilled promises', function () {
+            var p = Promise.of(1);
+
+            assert.equal('fulfilled', p.state());
         });
 
-        it('wraps undefined in an empty promise', function (done) {
-            Promise.wrap(undefined).map(function (x) {
-                assert.equal(undefined, x);
+        it('is rejected for rejected promises', function () {
+            var p = new Promise();
+            p.reject('error');
+
+            assert.equal('rejected', p.state());
+        });
+    });
+
+    describe('#resolve', function () {
+        it('resolves a promise with its final value', function () {
+            var p = new Promise();
+            p.resolve(1);
+
+            assert.equal('fulfilled', p.state());
+        });
+
+        it('triggers any listeners for resolution', function (done) {
+            var triggered = false,
+                p = new Promise();
+
+            p.map(function () {
+                triggered = true;
+                done();
+            });
+
+            p.resolve(1);
+
+            assert.ok(triggered);
+        });
+
+        it('does nothing to rejected promises', function () {
+            var p = new Promise();
+            p.reject('error');
+            p.resolve(1);
+
+            assert.equal('rejected', p.state());
+        });
+
+        it('does not trigger listeners if the promise is rejected', function () {
+            var triggered = false,
+                p = new Promise();
+
+            p.reject('error');
+            p.map(function () {
+                triggered = true;
+            });
+            p.resolve(1);
+
+            assert.ok(!triggered);
+        });
+    });
+
+    describe('#reject', function () {
+        it('rejects a promise, setting a reason', function () {
+            var p = new Promise();
+            p.reject('error');
+
+            assert.equal('rejected', p.state());
+        });
+
+        it('does nothing to fulfilled promises', function () {
+            var p = Promise.of(1);
+            p.reject('error');
+
+            assert.equal('fulfilled', p.state());
+        });
+
+        it('triggers onRejected listeners', function (done) {
+            var triggered = false,
+                p = new Promise();
+            p.onRejected(function (reason) {
+                triggered = true;
+                done();
+            });
+            p.reject('error');
+
+            assert.ok(triggered);
+        });
+
+        it('does not trigger onRejected listeners if already fulfilled', function () {
+            var triggered = false,
+                p = Promise.of(1);
+            p.onRejected(function (reason) {
+                triggered = true;
+            });
+            p.reject('error');
+
+            assert.ok(!triggered);
+        });
+    });
+
+    describe('#onRejected', function () {
+        it('binds a listener to be fired on rejection', function (done) {
+            var p = new Promise();
+            p.reject('error');
+
+            p.onRejected(function (reason) {
+                assert.equal('error', reason);
                 done();
             });
         });
@@ -147,6 +241,43 @@ describe('Promise', function () {
                 return Promise.of(x);
             }).map(function (x) {
                 assert.equal('foo', x);
+                done();
+            });
+        });
+
+        it('always returns a promise', function () {
+            assert.equal('object', typeof p.then());
+        });
+
+        it('returns a fulfilled promise with the return value of onRejected', function (done) {
+            var p = new Promise();
+
+            p.reject('foo');
+
+            var p2 = p.then(function (value) {
+                    return 1;
+                }, function (reason) {
+                    return 'error';
+                });
+
+            p2.map(function (x) {
+                assert.equal('error', x);
+                assert.equal('fulfilled', p2.state());
+                done();
+            });
+        });
+
+        it('assumes the return value of onFulfilled', function (done) {
+            var p = Promise.of('foo'),
+                p2 = p.then(function (value) {
+                    return 1;
+                }, function (reason) {
+                    return 'error';
+                });
+
+            p2.map(function (x) {
+                assert.equal(1, x);
+                assert.equal('fulfilled', p2.state());
                 done();
             });
         });
@@ -428,6 +559,10 @@ describe('Promise', function () {
                 done();
             });
         });
+    });
+
+    describe('Promises/A+ compliance', function () {
+        require('promises-aplus-tests').mocha(adapter);
     });
 });
 

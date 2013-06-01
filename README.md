@@ -1,28 +1,53 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
-This is an implementation of algebraic Promises in
-[node.js](http://nodejs.org). (With
-[Promises/A+](http://promises-aplus.github.io/promises-spec) compliance in
-progress.)
+```javascript
+{ 'pacta': '0.1.0' }
+```
+
+This is an implementation of [algebraic][Fantasy Land], [Promises/A+][A+]
+compliant Promises in [node.js](http://nodejs.org).
 
 Promises can be thought of as objects representing a value that may not have
-been calculated yet (similar to the [Maybe monad][Maybe]). An obvious example
-is the result of an asynchronous HTTP request: it's not clear *when*
-the request will be fulfilled but it will be at some point in the future.
-Having actual Promise objects representing these eventual values allows you
-to compose, transform and act on them without worrying about their time or
-sequence of execution.
+been calculated yet (they are sometimes referred to as `Deferred`s).
 
-For a worked example of this, see the
+An obvious example is the result of an asynchronous HTTP request: it's not
+clear *when* the request will be fulfilled but it will be at some point in the
+future. Having actual Promise objects representing these eventual values
+allows you to compose, transform and act on them without worrying about their
+time or sequence of execution.
+
+At their most basic, an empty promise can be created and resolved like so:
+
+```javascript
+var Promise = require('pacta').Promise;
+
+var p = new Promise();
+setTimeout(function () {
+
+  /* Populate the promise with its final value. */
+  p.resolve(1);
+}, 1000);
+```
+
+Promises can also be marked as `rejected` (viz. represent an error state) like
+so:
+
+```javascript
+/* Mark the promise as rejected with a reason. */
+p.reject('The server could not be found.');
+```
+
+For a worked example of using promises, see the
 [two](https://github.com/mudge/pacta/blob/master/example/codenames.js)
-[example programs](https://github.com/mudge/pacta/blob/master/example/codenames-2.js)
+[example
+programs](https://github.com/mudge/pacta/blob/master/example/codenames-2.js)
 and [sample HTTP
 client](https://github.com/mudge/pacta/blob/master/example/promised-http.js)
 included in Pacta.
 
 Pacta's promises can be used as the following algebraic structures as defined
 in the [Fantasy Land
-Specification](https://github.com/puffnfresh/fantasy-land):
+Specification][Fantasy Land]:
 
 * [Semigroups](https://github.com/puffnfresh/fantasy-land#semigroup) (through
   [`Promise#concat`](#promiseconcatp) which concatenates promises containing semigroups such as
@@ -38,16 +63,19 @@ Specification](https://github.com/puffnfresh/fantasy-land):
 * [Monads](https://github.com/puffnfresh/fantasy-land#monad) (through all of
   the above).
 
-Pacta's promises are also working towards compliance with the [Promises/A+
+Pacta's promises are compliant with the [Promises/A+
 specification](http://promises-aplus.github.io/promises-spec), providing
-partial implementations of the following:
+a [`then` method](#promisethenonfulfilledonrejected).
 
-* [The `then`
-  method](http://promises-aplus.github.io/promises-spec/#the__method) (through
-  [`Promise#then`](#promisethenonfulfilled)).
+Promises are resolved (or fulfilled) with
+[`Promise#resolve`](#promiseresolvex) and rejected with
+[`Promise#rejectreason`](#promiserejectreason).
 
-As well as above, Pacta also provides the following functions for creating and
-working with Promises of lists:
+To execute code on rejection without using `Promise#then`, use
+[`Promise#onRejected`](#promiseonrejectedf).
+
+Pacta also provides the following functions for creating and working with
+Promises of lists:
 
 * [`Promise#conjoin`](#promiseconjoinp) to concatenate promises into a list of
   values regardless of their original type meaning that non-Monoid types can
@@ -80,13 +108,12 @@ Array.empty();  //=> []
 String.empty(); //=> ""
 ```
 
-Note that Pacta does not handle errors or the concept of a failed promise as
-yet.
-
 See [the test
 suite](https://github.com/mudge/pacta/blob/master/test/pacta_test.js) for more
 information.
 
+[A+]: http://promises-aplus.github.io/promises-spec/
+[Fantasy Land]: https://github.com/puffnfresh/fantasy-land
 [Maybe]: https://en.wikipedia.org/wiki/Monad_(functional_programming)#The_Maybe_monad
 
 ## Usage
@@ -119,10 +146,25 @@ p.conjoin(p2).map(console.log); //=> [ 'Foo', 'bar' ]
 Promise.of([]).append(p).append(p2).map(console.log);
 //=> [ 'Foo', [ 'bar' ] ]
 
-p2.append(p).explode(function (x, y) {
+p2.append(p).spread(function (x, y) {
   console.log(x); //=> 'bar'
   console.log(y); //=> 'Foo'
 });
+
+var p4 = new Promise();
+setTimeout(function () {
+  p4.reject('Error!');
+}, 1000);
+
+p4.onRejected(function (reason) {
+  console.error(p4, 'Failed due to', reason);
+});
+
+p4.then(function (value) {
+  console.log('Success!', value);
+}, function (reason) {
+  console.error('Failure!', reason);
+})
 ```
 
 ## API Documentation
@@ -145,17 +187,6 @@ var promise = Promise.of('foo');
 
 Create a new, fulfilled promise already populated with a value `x`.
 
-### `Promise.wrap(x)`
-
-```javascript
-var promise = Promise.wrap(1);
-var promise = Promise.wrap(Promise.of('foo'));
-```
-
-Similar to [`Promise#of`](#promiseofx), wrap a value in a promise unless that
-value is already a promise in which case return it directly. It can be seen as
-a way to coerce a value to a promise.
-
 ### `Promise#resolve(x)`
 
 ```javascript
@@ -165,7 +196,16 @@ promise.resolve(5);
 
 Populate a promise with the value `x` thereby resolving it.
 
-*This function can also be called as `Promise#fulfil`.*
+*This function can also be called as `Promise#fulfill`.*
+
+### `Promise#reject(reason)`
+
+```javascript
+var promise = new Promise();
+promise.reject('Errored out!');
+```
+
+Mark a promise as rejected, populating it with a reason.
 
 ### `Promise#map(f)`
 
@@ -197,7 +237,7 @@ use side-effects within your given function (e.g. `console.log`) as well as
 modifying the value and returning it in order to affect the returning
 promise.
 
-### `Promise#then(onFulfilled)`
+### `Promise#then(onFulfilled, onRejected)`
 
 ```javascript
 promise.then(function (value) {
@@ -207,23 +247,33 @@ promise.then(function (value) {
 promise.then(function (value) {
   return Promise.of(x * 2);
 }); //=> Promise.of(4)
+
+promise.then(function (value) {
+  return console.log('Success!', value);
+}, function (reason) {
+  return console.error('Error!', reason);
+});
 ```
 
-A partial implementation of the [Promises/A+ `then`
-method](http://promises-aplus.github.io/promises-spec/#the__method) similar to
-[`Promise#map`](#promisemapf).
+An implementation of the [Promises/A+ `then`
+method](http://promises-aplus.github.io/promises-spec/#the__method), taking an
+optional `onFulfilled` and `onRejected` function to call when the promise is
+fulfilled or rejected respectively.
 
-Note that, unlike `map`, `then` will always return a promise of a value: it is
-not possible to return a promise of a promise as per the specification. Its
-type signature is:
+Like `map`, `then` returns a promise itself and can be chained.
 
-```haskell
-then :: Promise a -> (a -> b)         -> Promise b
-then :: Promise a -> (a -> Promise b) -> Promise b
+### `Promise#onRejected(f)`
+
+```javascript
+var p = new Promise();
+p.reject('Error!');
+p.onRejected(function (reason) {
+  console.error('Failed:', reason);
+});
 ```
 
-As Pacta does not yet support promise rejection or errors, this is not fully
-compliant yet.
+Identical to [`Promise#map`](#promisemapf) but only executed when a promise is
+rejected rather than resolved.
 
 ### `Promise#concat(p)`
 
