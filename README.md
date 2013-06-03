@@ -73,7 +73,7 @@ a [`then` method](#promisethenonfulfilled-onrejected).
 
 Promises are resolved (or fulfilled) with
 [`Promise#resolve`](#promiseresolvex) and rejected with
-[`Promise#rejectreason`](#promiserejectreason).
+[`Promise#reject`](#promiserejectreason).
 
 To execute code on rejection without using
 [`Promise#then`](#promisethenonfulfilled-onrejected), use
