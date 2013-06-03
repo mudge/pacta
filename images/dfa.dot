@@ -1,0 +1,14 @@
+digraph pacta {
+  margin = 0;
+  rankdir = LR;
+  height = 4;
+  bgcolor = "transparent";
+  node [shape = circle, fontname = "Open Sans", style = "filled", fillcolor = "white"];
+  edge [fontname = "Open Sans"];
+  Start [width = 0, height = 0, shape = none, label = "", style = ""];
+  Fulfilled [shape = doublecircle];
+  Rejected [shape = doublecircle];
+  Start -> Pending;
+  Pending -> Fulfilled [label = "resolve"];
+  Pending -> Rejected  [label = "reject"];
+}

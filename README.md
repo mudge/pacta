@@ -37,6 +37,10 @@ so:
 p.reject('The server could not be found.');
 ```
 
+Concretely, a promise can be represented by the following deterministic finite automaton:
+
+<p align="center"><img src="images/dfa.png" width="275" height="192" alt=""></p>
+
 For a worked example of using promises, see the
 [two](https://github.com/mudge/pacta/blob/master/example/codenames.js)
 [example
