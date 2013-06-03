@@ -1,9 +1,12 @@
+/*global describe, it, beforeEach */
+'use strict';
+
 var assert = require('assert'),
     Promise = require('../lib/pacta').Promise,
     adapter = require('./pacta_adapter');
 
 describe('Promise', function () {
-    var p, p2, p3, p4;
+    var p, p2, p3;
 
     beforeEach(function () {
         p = new Promise();
@@ -20,8 +23,6 @@ describe('Promise', function () {
         setTimeout(function () {
             p3.resolve('baz');
         }, 75);
-
-        p4 = Promise.of('quux');
     });
 
     describe('.of', function () {
@@ -116,7 +117,7 @@ describe('Promise', function () {
         it('triggers onRejected listeners', function (done) {
             var triggered = false,
                 p = new Promise();
-            p.onRejected(function (reason) {
+            p.onRejected(function () {
                 triggered = true;
                 done();
             });
@@ -128,7 +129,7 @@ describe('Promise', function () {
         it('does not trigger onRejected listeners if already fulfilled', function () {
             var triggered = false,
                 p = Promise.of(1);
-            p.onRejected(function (reason) {
+            p.onRejected(function () {
                 triggered = true;
             });
             p.reject('error');
@@ -158,7 +159,7 @@ describe('Promise', function () {
         });
 
         it('yields the value after resolution', function (done) {
-            p.map(function (x) {
+            p.map(function () {
                 /* Promise is now resolved so map again... */
                 p.map(function (x) {
                     assert.equal('foo', x);
@@ -250,15 +251,15 @@ describe('Promise', function () {
         });
 
         it('returns a fulfilled promise with the return value of onRejected', function (done) {
-            var p = new Promise();
+            var p = new Promise(), p2;
 
             p.reject('foo');
 
-            var p2 = p.then(function (value) {
-                    return 1;
-                }, function (reason) {
-                    return 'error';
-                });
+            p2 = p.then(function () {
+                return 1;
+            }, function () {
+                return 'error';
+            });
 
             p2.map(function (x) {
                 assert.equal('error', x);
@@ -269,9 +270,9 @@ describe('Promise', function () {
 
         it('assumes the return value of onFulfilled', function (done) {
             var p = Promise.of('foo'),
-                p2 = p.then(function (value) {
+                p2 = p.then(function () {
                     return 1;
-                }, function (reason) {
+                }, function () {
                     return 'error';
                 });
 

@@ -1,3 +1,5 @@
+'use strict';
+
 /* An adapter for the Promises/A+ compatibility suite. */
 var Promise = require('../lib/pacta').Promise;
 
