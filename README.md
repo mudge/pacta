@@ -1,7 +1,7 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 ```javascript
-{ 'pacta': '0.1.0' }
+{ 'pacta': '0.2.0' }
 ```
 
 This is an implementation of [algebraic][Fantasy Land], [Promises/A+][A+]
@@ -302,6 +302,10 @@ Its type signature is:
 ```haskell
 concat :: Promise a -> Promise a -> Promise a
 ```
+
+If either of the original two promises is rejected, the resulting concatenated
+promise will also be rejected. Note that only the first rejection will count
+as further rejections will be ignored.
 
 See also [`Promise#conjoin`](#promiseconjoinp) and
 [`Promise#append`](#promiseappendp).
