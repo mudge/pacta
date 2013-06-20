@@ -330,6 +330,31 @@ describe('Promise', function () {
                 done();
             });
         });
+
+        it('is rejected if the first promise is rejected', function (done) {
+            p.reject('Foo');
+            p.concat(p2).onRejected(function (reason) {
+                assert.equal('Foo', reason);
+                done();
+            });
+        });
+
+        it('is rejected if the second promise is rejected', function (done) {
+            p2.reject('Foo');
+            p.concat(p2).onRejected(function (reason) {
+                assert.equal('Foo', reason);
+                done();
+            });
+        });
+
+        it('takes the first rejection if both promises are rejected', function (done) {
+            p.reject('Foo');
+            p2.reject('Bar');
+            p.concat(p2).onRejected(function (reason) {
+                assert.equal('Foo', reason);
+                done();
+            });
+        });
     });
 
     describe('#chain', function () {
