@@ -1,11 +1,12 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 ```javascript
-{ 'pacta': '0.2.0' }
+{ 'pacta': '0.3.0' }
 ```
 
 This is an implementation of [algebraic][Fantasy Land], [Promises/A+][A+]
-compliant Promises in [node.js](http://nodejs.org).
+compliant Promises in JavaScript (both for the browser and
+[node.js](http://nodejs.org)).
 
 Promises can be thought of as objects representing a value that may not have
 been calculated yet (they are sometimes referred to as `Deferred`s).
