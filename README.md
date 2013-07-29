@@ -4,6 +4,11 @@
 { 'pacta': '0.3.0' }
 ```
 
+```shell
+$ npm install pacta   # for node
+$ bower install pacta # for the browser
+```
+
 This is an implementation of [algebraic][Fantasy Land], [Promises/A+][A+]
 compliant Promises in JavaScript (both for the browser and
 [node.js](http://nodejs.org)).

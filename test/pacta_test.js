@@ -1,9 +1,11 @@
 /*global describe, it, beforeEach */
 'use strict';
 
-var assert = require('assert'),
-    Promise = require('../lib/pacta').Promise,
-    adapter = require('./pacta_adapter');
+/* Skip requires when running in a browser. */
+if (typeof require === 'function') {
+    var assert = require('assert'),
+        Promise = require('../lib/pacta').Promise;
+}
 
 describe('Promise', function () {
     var p, p2, p3;
