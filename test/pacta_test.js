@@ -586,10 +586,6 @@ describe('Promise', function () {
             });
         });
     });
-
-    describe('Promises/A+ compliance', function () {
-        require('promises-aplus-tests').mocha(adapter);
-    });
 });
 
 describe('Array', function () {
