@@ -6,9 +6,12 @@
   </head>
   <body>
     <div id="mocha"></div>
-    <script src="../bower_components/assert/assert.js"></script>
+    <script src="../bower_components/proclaim/lib/proclaim.js"></script>
     <script src="../bower_components/mocha/mocha.js"></script>
-    <script>mocha.setup('bdd');</script>
+    <script>
+      var assert = proclaim;
+      mocha.setup('bdd');
+    </script>
     <script src="../lib/pacta.js"></script>
     <script src="pacta_test.js"></script>
     <script>
