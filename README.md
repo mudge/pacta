@@ -25,7 +25,7 @@ time or sequence of execution.
 At their most basic, an empty promise can be created and resolved like so:
 
 ```javascript
-var Promise = require('pacta').Promise;
+var Promise = require('pacta');
 
 var p = new Promise();
 setTimeout(function () {
@@ -130,7 +130,7 @@ information.
 ## Usage
 
 ```javascript
-var Promise = require('pacta').Promise;
+var Promise = require('pacta');
 
 var p = new Promise();
 setTimeout(function () {
