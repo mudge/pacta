@@ -1,13 +1,15 @@
-/*global describe, it, beforeEach */
-'use strict';
-
+/*global describe, it, beforeEach, require, setTimeout */
 (function (context, test) {
+    'use strict';
+
     if (typeof context.assert === 'object' && typeof context.Promise === 'function') {
         test(context.assert, context.Promise);
     } else {
         test(require('assert'), require('../lib/pacta'));
     }
 }(this, function (assert, Promise) {
+    'use strict';
+
     describe('Promise', function () {
         var p, p2, p3, p4;
 
