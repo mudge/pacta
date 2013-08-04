@@ -1,7 +1,7 @@
 'use strict';
 
 /* An adapter for the Promises/A+ compatibility suite. */
-var Promise = require('../lib/pacta').Promise;
+var Promise = require('../lib/pacta');
 
 exports.fulfilled = function (value) {
     return Promise.of(value);
