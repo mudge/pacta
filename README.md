@@ -1,11 +1,17 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 ```javascript
-{ 'pacta': '0.2.0' }
+{ 'pacta': '0.3.0' }
+```
+
+```shell
+$ npm install pacta   # for node
+$ bower install pacta # for the browser
 ```
 
 This is an implementation of [algebraic][Fantasy Land], [Promises/A+][A+]
-compliant Promises in [node.js](http://nodejs.org).
+compliant Promises in JavaScript (both for the browser and
+[node.js](http://nodejs.org)).
 
 Promises can be thought of as objects representing a value that may not have
 been calculated yet (they are sometimes referred to as `Deferred`s).
@@ -19,7 +25,8 @@ time or sequence of execution.
 At their most basic, an empty promise can be created and resolved like so:
 
 ```javascript
-var Promise = require('pacta').Promise;
+/* Include pacta.js or require explicitly in node.js: */
+var Promise = require('pacta');
 
 var p = new Promise();
 setTimeout(function () {
@@ -124,7 +131,7 @@ information.
 ## Usage
 
 ```javascript
-var Promise = require('pacta').Promise;
+var Promise = require('pacta');
 
 var p = new Promise();
 setTimeout(function () {

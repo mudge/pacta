@@ -1,0 +1,19 @@
+{
+    "name": "pacta",
+    "description": "An algebraic, Promises/A+ compliant implementation of Promises.",
+    "keywords": ["promises", "monad", "functor", "promises-aplus"],
+    "authors": ["Paul Mucur"],
+    "version": "0.3.0",
+    "main": "lib/pacta.js",
+    "devDependencies": {
+        "mocha": "1.12.0",
+        "proclaim": "1.5.0"
+    },
+    "ignore": [
+        "bower_components",
+        "node_modules",
+        "example",
+        "images",
+        "test"
+    ]
+}
