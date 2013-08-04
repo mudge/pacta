@@ -25,6 +25,7 @@ time or sequence of execution.
 At their most basic, an empty promise can be created and resolved like so:
 
 ```javascript
+/* Include pacta.js or require explicitly in node.js: */
 var Promise = require('pacta');
 
 var p = new Promise();
