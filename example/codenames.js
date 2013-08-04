@@ -16,7 +16,7 @@
  * See examples/codenames-2.js for another way to achieve the same result.
  */
 var http = require('./promised-http'),
-    Promise = require('../lib/pacta').Promise;
+    Promise = require('../lib/pacta');
 
 var random = function (coll) {
     return coll[Math.floor(Math.random() * coll.length)];

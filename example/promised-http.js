@@ -1,5 +1,5 @@
 var http = require('http'),
-    Promise = require('../lib/pacta').Promise;
+    Promise = require('../lib/pacta');
 
 var get = function (options) {
     var promise = new Promise();
