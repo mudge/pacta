@@ -14,10 +14,10 @@ exports.rejected = function (reason) {
     return promise;
 };
 
-exports.pending = function () {
+exports.deferred = function () {
     return {
         promise: new Promise(),
-        fulfill: function (value) {
+        resolve: function (value) {
             this.promise.resolve(value);
         },
         reject: function (reason) {

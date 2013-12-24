@@ -1,7 +1,7 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 ```javascript
-{ 'pacta': '0.3.0' }
+{ 'pacta': '0.4.0' }
 ```
 
 ```shell
@@ -249,6 +249,9 @@ use side-effects within your given function (e.g. `console.log`) as well as
 modifying the value and returning it in order to affect the returning
 promise.
 
+Note that any uncaught exceptions during the execution of `f` will result in
+the promise being `rejected` with the exception as its `reason`.
+
 ### `Promise#then([onFulfilled[, onRejected]])`
 
 ```javascript
@@ -268,7 +271,7 @@ promise.then(function (value) {
 ```
 
 An implementation of the [Promises/A+ `then`
-method](http://promises-aplus.github.io/promises-spec/#the__method), taking an
+method](http://promisesaplus.com/#the__method), taking an
 optional `onFulfilled` and `onRejected` function to call when the promise is
 fulfilled or rejected respectively.
 
@@ -287,6 +290,32 @@ p.onRejected(function (reason) {
 
 Identical to [`Promise#map`](#promisemapf) but only executed when a promise is
 rejected rather than resolved.
+
+Note that `onRejected` returns a promise itself that is fulfilled by the given
+function, `f`. In this way, you can gracefully recover from errors like so:
+
+```javascript
+var p = new Promise();
+p.reject('Error!');
+
+p.onRejected(function (reason) {
+  return 'Some safe default';
+}).map(console.log);
+//=> Logs "Some safe default"
+```
+
+Like [`Promise#map`](#promisemapf), any uncaught exceptions within `f` will
+result in a `rejected` promise:
+
+```javascript
+var p = new Promise();
+p.reject('Error!');
+
+p.onRejected(function (reason) {
+  throw 'Another error!';
+}).onRejected(console.log);
+//=> Logs "Another error!"
+```
 
 ### `Promise#concat(p)`
 

@@ -74,12 +74,15 @@
                 p = new Promise();
                 p.map(function () {
                     triggered = true;
-                    done();
                 });
 
                 p.resolve(1);
 
-                assert.ok(triggered);
+                /* Wait for a new execution context stack. */
+                setTimeout(function () {
+                    assert.ok(triggered);
+                    done();
+                }, 50);
             });
 
             it('does nothing to rejected promises', function () {
@@ -125,11 +128,14 @@
                 p = new Promise();
                 p.onRejected(function () {
                     triggered = true;
-                    done();
                 });
                 p.reject('error');
 
-                assert.ok(triggered);
+                /* Wait for a new execution context stack. */
+                setTimeout(function () {
+                    assert.ok(triggered);
+                    done();
+                }, 50);
             });
 
             it('does not trigger onRejected listeners if already fulfilled', function () {
@@ -152,6 +158,37 @@
 
                 p.onRejected(function (reason) {
                     assert.equal('error', reason);
+                    done();
+                });
+            });
+
+            it('can be used to recover from a rejection', function (done) {
+                p = new Promise();
+                p.reject(new TypeError());
+
+                p2 = p.onRejected(function () {
+                    assert.equal('rejected', p.state());
+                    return 'Some safe default';
+                });
+
+                p2.map(function (x) {
+                    assert.equal('fulfilled', p2.state());
+                    assert.equal('Some safe default', x);
+                    done();
+                });
+            });
+
+            it('can chain failures', function (done) {
+                p = new Promise();
+                p.reject(new TypeError());
+
+                p2 = p.onRejected(function () {
+                    assert.equal('rejected', p.state());
+                    throw new TypeError();
+                });
+
+                p2.onRejected(function () {
+                    assert.equal('rejected', p2.state());
                     done();
                 });
             });
@@ -194,6 +231,20 @@
                             done();
                         });
                     });
+                });
+            });
+
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError();
+
+                p4 = p.map(function () {
+                    throw exception;
+                });
+
+                p4.onRejected(function (r) {
+                    assert.equal('rejected', p4.state());
+                    assert.equal(exception, r);
+                    done();
                 });
             });
 

@@ -4,12 +4,12 @@
     "homepage": "https://github.com/mudge/pacta",
     "author": "Paul Mucur (http://mudge.name)",
     "keywords": ["promises", "monad", "functor", "promises-aplus"],
-    "version": "0.3.0",
+    "version": "0.4.0",
     "main": "./lib/pacta.js",
     "dependencies": {},
     "devDependencies": {
-        "mocha": "1.10.0",
-        "promises-aplus-tests": "1.3.1"
+        "mocha": "1.16.1",
+        "promises-aplus-tests": "2.0.3"
     },
     "scripts": { "test": "mocha" },
     "repository": {
