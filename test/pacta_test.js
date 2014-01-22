@@ -11,7 +11,7 @@
     'use strict';
 
     describe('Promise', function () {
-        var p, p2, p3, p4;
+        var p, p2, p3, p4, p5, p6, p7;
 
         beforeEach(function () {
             p = new Promise();
@@ -28,6 +28,21 @@
             setTimeout(function () {
                 p3.resolve('baz');
             }, 75);
+
+            p5 = new Promise();
+            setTimeout(function () {
+                p5.reject('foo');
+            }, 50);
+
+            p6 = new Promise();
+            setTimeout(function () {
+                p6.reject('bar');
+            }, 25);
+
+            p7 = new Promise();
+            setTimeout(function () {
+                p7.reject('baz');
+            }, 25);
         });
 
         describe('.of', function () {
@@ -278,6 +293,76 @@
             });
         });
 
+        describe('#mapError', function () {
+            it('yields the reason of the promise', function (done) {
+                p5.mapError(function (x) {
+                    assert.equal('foo', x);
+                    done();
+                });
+            });
+
+            it('yields the reason after rejection', function (done) {
+                p5.mapError(function () {
+                    /* Promise is now rejected so mapError again... */
+                    p5.mapError(function (x) {
+                        assert.equal('foo', x);
+                        done();
+                    });
+                });
+            });
+
+            it('can be chained', function (done) {
+                p5.mapError(function (x) {
+                    return x + '!';
+                }).mapError(function (y) {
+                    assert.equal('foo!', y);
+                    done();
+                });
+            });
+
+            it('can be nested', function (done) {
+                p5.mapError(function (x) {
+                    p6.mapError(function (y) {
+                        p7.mapError(function (z) {
+                            assert.equal('foo', x);
+                            assert.equal('bar', y);
+                            assert.equal('baz', z);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fulfils the identity property of a functor', function (done) {
+                p5.mapError(function (x) {
+                    return x;
+                }).mapError(function (x) {
+                    assert.equal('foo', x);
+                    done();
+                });
+            });
+
+            it('fulfils the composition property of a functor #1', function (done) {
+                var f = function (x) { return 'f(' + x + ')'; },
+                    g = function (x) { return 'g(' + x + ')'; };
+
+                p5.mapError(function (x) { return f(g(x)); }).mapError(function (x) {
+                    assert.equal('f(g(foo))', x);
+                    done();
+                });
+            });
+
+            it('fulfils the composition property of a functor #2', function (done) {
+                var f = function (x) { return 'f(' + x + ')'; },
+                    g = function (x) { return 'g(' + x + ')'; };
+
+                p5.mapError(g).mapError(f).mapError(function (x) {
+                    assert.equal('f(g(foo))', x);
+                    done();
+                });
+            });
+        });
+
         describe('#then', function () {
             it('yields its value like #map', function (done) {
                 p.then(function (x) {
@@ -430,6 +515,28 @@
                     g = function (x) { return Promise.of('g(' + x + ')'); };
 
                 p.chain(function (x) { return f(x).chain(g); }).map(function (x) {
+                    assert.equal('g(f(foo))', x);
+                    done();
+                });
+            });
+        });
+
+        describe('#chainError', function () {
+            it('fulfils the associativity property of chain #1', function (done) {
+                var f = function (x) { var p = new Promise(); p.reject('f(' + x + ')'); return p; },
+                    g = function (x) { var p = new Promise(); p.reject('g(' + x + ')'); return p; };
+
+                p5.chainError(f).chainError(g).mapError(function (x) {
+                    assert.equal('g(f(foo))', x);
+                    done();
+                });
+            });
+
+            it('fulfils the associativity property of chain #2', function (done) {
+                var f = function (x) { var p = new Promise(); p.reject('f(' + x + ')'); return p; },
+                    g = function (x) { var p = new Promise(); p.reject('g(' + x + ')'); return p; };
+
+                p5.chainError(function (x) { return f(x).chainError(g); }).mapError(function (x) {
                     assert.equal('g(f(foo))', x);
                     done();
                 });
