@@ -1,7 +1,7 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 ```javascript
-{ 'pacta': '0.4.0' }
+{ 'pacta': '0.5.0' }
 ```
 
 ```shell
@@ -265,8 +265,9 @@ promise.mapError(function (x) {
 }); //=> Rejected promise with "Error: Type error at line 214" as reason
 ```
 
-Execute a function `f` on the reason of the promise. This returns a new
-rejected promise containing the result of applying `f` to the initial promise's reason.
+Execute a function `f` on the reason of a rejected promise. This returns a new
+rejected promise containing the result of applying `f` to the initial
+promise's reason.
 
 In [Haskell](http://www.haskell.org) notation, its type signature is:
 
@@ -425,9 +426,9 @@ getMessage()
     .mapError(console.error);
 ```
 
-Execute a function `f` with the reason of the promise. This differs from
-[`Promise#mapError`](#promisemaperrorf) in that the function *must* return a promise
-itself.
+Execute a function `f` with the reason of a rejected promise. This differs
+from [`Promise#mapError`](#promisemaperrorf) in that the function *must*
+return a promise itself.
 
 Its type signature is:
 
@@ -529,6 +530,11 @@ promise.spread(function (x, y) {
 Similar to [`Promise#map`](#promisemapf), apply a function `f` to a promise of
 a list but, instead of receiving a single argument, pass each value of the
 list to the function separately.
+
+## Contributors
+
+`mapError` and `chainError` were contributed by [Rodolphe
+Belouin](https://github.com/rbelouin).
 
 ## Acknowledgements
 
