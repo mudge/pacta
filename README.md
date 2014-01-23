@@ -241,13 +241,38 @@ promise containing the result of applying `f` to the initial promise's value.
 In [Haskell](http://www.haskell.org) notation, its type signature is:
 
 ```haskell
-map :: Promise a -> (a -> b) -> Promise b
+map :: Promise e a -> (a -> b) -> Promise e b
 ```
 
 Note that this is the primary way of acting on the value of a promise: you can
 use side-effects within your given function (e.g. `console.log`) as well as
 modifying the value and returning it in order to affect the returning
 promise.
+
+Note that any uncaught exceptions during the execution of `f` will result in
+the promise being `rejected` with the exception as its `reason`.
+
+### `Promise#mapError(f)`
+
+```javascript
+var promise = new Promise();
+promise.reject("Type error at line 214");
+
+promise.mapError(function (x) {
+  console.log(x);
+
+  return "Error: " + x;
+}); //=> Rejected promise with "Error: Type error at line 214" as reason
+```
+
+Execute a function `f` on the reason of the promise. This returns a new
+rejected promise containing the result of applying `f` to the initial promise's reason.
+
+In [Haskell](http://www.haskell.org) notation, its type signature is:
+
+```haskell
+mapError :: Promise e a -> (e -> f) -> Promise f a
+```
 
 Note that any uncaught exceptions during the execution of `f` will result in
 the promise being `rejected` with the exception as its `reason`.
@@ -336,7 +361,7 @@ of joining arrays, etc. applies.
 Its type signature is:
 
 ```haskell
-concat :: Promise a -> Promise a -> Promise a
+concat :: Promise e a -> Promise e a -> Promise e a
 ```
 
 If either of the original two promises is rejected, the resulting concatenated
@@ -361,7 +386,53 @@ itself.
 Its type signature is:
 
 ```haskell
-chain :: Promise a -> (a -> Promise b) -> Promise b
+chain :: Promise e a -> (a -> Promise e b) -> Promise e b
+```
+
+### `Promise#chainError(f)`
+
+```javascript
+var criticalAjaxCallThatMayFail = function() {
+    var p = new Promise();
+
+    setTimeout(function() {
+        if(Date.now() % 2 == 0) {
+            p.reject("Request timed out");
+        }
+        else {
+            p.resolve("This is a critical sentence.");
+        }
+    }, 2000);
+
+    return p;
+};
+
+var getMessage = function(error) {
+    if(error) {
+        console.error("Error received: " + error);
+        console.log("Retrying…");
+    }
+
+    console.log("Sending request…");
+    return criticalAjaxCallThatMayFail();
+};
+
+/* Retry 2 times if it fails */
+getMessage()
+    .chainError(getMessage)
+    .chainError(getMessage)
+    .map(console.log)
+    .mapError(console.error);
+```
+
+Execute a function `f` with the reason of the promise. This differs from
+[`Promise#mapError`](#promisemaperrorf) in that the function *must* return a promise
+itself.
+
+Its type signature is:
+
+```haskell
+chainError :: Promise e a -> (e -> Promise f a) -> Promise f a
 ```
 
 ### `Promise#ap(p)`
@@ -379,7 +450,7 @@ containing a value.
 Its type signature is:
 
 ```haskell
-ap :: Promise (a -> b) -> Promise a -> Promise b
+ap :: Promise e (a -> b) -> Promise e a -> Promise e b
 ```
 
 ### `Promise#empty()`
