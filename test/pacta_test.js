@@ -333,6 +333,24 @@
                 });
             });
 
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError(),
+                    pe1 = new Promise(),
+                    pe2;
+
+                pe1.reject('foo');
+
+                pe2 = pe1.mapError(function () {
+                    throw exception;
+                });
+
+                pe2.onRejected(function (r) {
+                    assert.equal('rejected', pe2.state());
+                    assert.equal(exception, r);
+                    done();
+                });
+            });
+
             it('fulfils the identity property of a functor', function (done) {
                 p5.mapError(function (x) {
                     return x;
