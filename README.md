@@ -256,12 +256,12 @@ the promise being `rejected` with the exception as its `reason`.
 
 ```javascript
 var promise = new Promise();
-promise.reject("Type error at line 214");
+promise.reject('Type error at line 214');
 
 promise.mapError(function (x) {
   console.log(x);
 
-  return "Error: " + x;
+  return 'Error: ' + x;
 }); //=> Rejected promise with "Error: Type error at line 214" as reason
 ```
 
@@ -396,25 +396,24 @@ chain :: Promise e a -> (a -> Promise e b) -> Promise e b
 var criticalAjaxCallThatMayFail = function() {
     var p = new Promise();
 
-    setTimeout(function() {
-        if(Date.now() % 2 == 0) {
-            p.reject("Request timed out");
-        }
-        else {
-            p.resolve("This is a critical sentence.");
+    setTimeout(function () {
+        if (Date.now() % 2 === 0) {
+            p.reject('Request timed out');
+        } else {
+            p.resolve('This is a critical sentence.');
         }
     }, 2000);
 
     return p;
 };
 
-var getMessage = function(error) {
-    if(error) {
-        console.error("Error received: " + error);
-        console.log("Retrying…");
+var getMessage = function (error) {
+    if (error) {
+        console.error('Error received: ' + error);
+        console.log('Retrying...');
     }
 
-    console.log("Sending request…");
+    console.log('Sending request...');
     return criticalAjaxCallThatMayFail();
 };
 
