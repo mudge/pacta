@@ -537,6 +537,18 @@
                     done();
                 });
             });
+
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError();
+
+                var p = Promise.of().chain(function () { throw exception; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(exception, r);
+                    done();
+                });
+            });
         });
 
         describe('#chainError', function () {
