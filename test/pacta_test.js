@@ -11,6 +11,12 @@
     'use strict';
 
     describe('Promise', function () {
+        function rejected(reason) {
+            var p = new Promise();
+            p.reject(reason);
+            return p;
+        }
+
         var p, p2, p3, p4, p5, p6, p7;
 
         beforeEach(function () {
@@ -537,6 +543,28 @@
                     done();
                 });
             });
+
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError();
+
+                var p = Promise.of().chain(function () { throw exception; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(exception, r);
+                    done();
+                });
+            });
+
+            it('rejects the returned promise, if f does not return a promise', function (done) {
+                var p = Promise.of().chain(function () { return 'not-a-promise'; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(TypeError, r.constructor);
+                    done();
+                });
+            });
         });
 
         describe('#chainError', function () {
@@ -556,6 +584,28 @@
 
                 p5.chainError(function (x) { return f(x).chainError(g); }).mapError(function (x) {
                     assert.equal('g(f(foo))', x);
+                    done();
+                });
+            });
+
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError();
+
+                var p = rejected().chainError(function () { throw  exception; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(exception, r);
+                    done();
+                });
+            });
+
+            it('rejects the returned promise, if f does not return a promise', function (done) {
+                var p = rejected().chainError(function () { return 'not-a-promise'; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(TypeError, r.constructor);
                     done();
                 });
             });
