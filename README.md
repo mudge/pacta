@@ -1,7 +1,7 @@
 # pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
 
 ```javascript
-{ 'pacta': '0.5.0' }
+{ 'pacta': '0.5.1' }
 ```
 
 ```shell
