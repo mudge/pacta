@@ -532,8 +532,10 @@ list to the function separately.
 
 ## Contributors
 
-`mapError` and `chainError` were contributed by [Rodolphe
-Belouin](https://github.com/rbelouin).
+* Fixes to `chain`, `chainError` and `empty` were contributed by [Ben
+  Schulz](https://github.com/benschulz);
+* `mapError` and `chainError` were contributed by [Rodolphe
+  Belouin](https://github.com/rbelouin).
 
 ## Acknowledgements
 

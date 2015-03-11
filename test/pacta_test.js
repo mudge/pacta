@@ -536,6 +536,27 @@
                     done();
                 });
             });
+
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError(),
+                    p = fulfilledPromise().chain(function () { throw exception; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(exception, r);
+                    done();
+                });
+            });
+
+            it('rejects the returned promise, if f does not return a promise', function (done) {
+                var p = fulfilledPromise().chain(function () { return 'not-a-promise'; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(TypeError, r.constructor);
+                    done();
+                });
+            });
         });
 
         describe('#chainError', function () {
@@ -555,6 +576,27 @@
 
                 rejectedPromise('foo').chainError(function (x) { return f(x).chainError(g); }).mapError(function (x) {
                     assert.equal('g(f(foo))', x);
+                    done();
+                });
+            });
+
+            it('encapsulates exceptions in rejections', function (done) {
+                var exception = new TypeError(),
+                    p = rejectedPromise().chainError(function () { throw exception; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(exception, r);
+                    done();
+                });
+            });
+
+            it('rejects the returned promise, if f does not return a promise', function (done) {
+                var p = rejectedPromise().chainError(function () { return 'not-a-promise'; });
+
+                p.onRejected(function (r) {
+                    assert.equal('rejected', p.state());
+                    assert.equal(TypeError, r.constructor);
                     done();
                 });
             });
@@ -654,6 +696,17 @@
                     assert.deepEqual([1], x);
                     done();
                 });
+            });
+
+            it('works with unresolved promises', function (done) {
+                var p = emptyPromise();
+
+                p.concat(p.empty()).map(function (x) {
+                    assert.deepEqual([1], x);
+                    done();
+                });
+
+                p.resolve([1]);
             });
         });
 
