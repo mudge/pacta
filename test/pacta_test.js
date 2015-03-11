@@ -697,6 +697,17 @@
                     done();
                 });
             });
+
+            it('works with unresolved promises', function (done) {
+                var p = emptyPromise();
+
+                p.concat(p.empty()).map(function (x) {
+                    assert.deepEqual([1], x);
+                    done();
+                });
+
+                p.resolve([1]);
+            });
         });
 
         describe('#conjoin', function () {
