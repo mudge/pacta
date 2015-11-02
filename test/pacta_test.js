@@ -68,6 +68,62 @@
             });
         });
 
+        describe('.resolve', function () {
+            it('returns a resolved promise for a value', function (done) {
+                Promise.resolve('Success').then(function (value) {
+                    assert.equal('Success', value);
+                    done();
+                });
+            });
+
+            it('returns a resolved promise for a resolved promise', function (done) {
+                var original = Promise.resolve(true);
+
+                Promise.resolve(original).then(function (v) {
+                    assert.ok(v);
+                    done();
+                });
+            });
+
+            it('converts thenables into Promises', function () {
+                var promise = Promise.resolve({
+                    then: function (resolve) {
+                        resolve('fulfilled!');
+                    }
+                });
+
+                assert.equal(Promise, promise.constructor);
+            });
+
+            it('can resolve converted thenables', function (done) {
+                var promise = Promise.resolve({
+                    then: function (resolve) {
+                        resolve('fulfilled!');
+                    }
+                });
+
+                promise.then(function (v) {
+                    assert.equal('fulfilled!', v);
+                    done();
+                });
+            });
+
+            it('can reject converted thenables', function (done) {
+                var error = new TypeError('Throwing'),
+                    promise = Promise.resolve({
+                        then: function (resolve) {
+                           throw error;
+                           resolve('Resolving');
+                        }
+                    });
+
+                promise.then(function () { }, function (e) {
+                    assert.equal(error, e);
+                    done();
+                });
+            });
+        });
+
         describe('.reject', function () {
             it('wraps a reason in a new promise', function (done) {
                 Promise.reject('error').onRejected(function (reason) {
