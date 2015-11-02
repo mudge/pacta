@@ -133,6 +133,41 @@
             });
         });
 
+        describe('.race', function () {
+            it('returns a promise resolved with the first promise to resolve', function (done) {
+                var p1 = emptyPromise(),
+                    p2 = emptyPromise();
+
+                setTimeout(function () { p1.resolve(1); }, 50);
+                setTimeout(function () { p2.resolve(2); }, 10);
+
+                Promise.race([p1, p2]).then(function (value) {
+                    assert.equal(2, value);
+                    done();
+                });
+            });
+
+            it('returns a promise rejected with the first promise to reject', function (done) {
+                var p1 = emptyPromise(),
+                    p2 = emptyPromise();
+
+                setTimeout(function () { p1.resolve(1); }, 50);
+                setTimeout(function () { p2.reject('error'); }, 10);
+
+                Promise.race([p1, p2]).onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+
+            it('takes an iterable of things that can be resolved to promises', function (done) {
+                Promise.race([1, Promise.resolve(2)]).then(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+        });
+
         describe('#state', function () {
             it('is pending for unfulfilled and unrejected promises', function () {
                 assert.equal('pending', emptyPromise().state());
