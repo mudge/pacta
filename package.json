@@ -9,7 +9,7 @@
         "functor",
         "promises-aplus"
     ],
-    "version": "0.5.1",
+    "version": "0.9.0",
     "main": "./lib/pacta.js",
     "dependencies": {},
     "devDependencies": {

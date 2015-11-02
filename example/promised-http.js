@@ -2,21 +2,23 @@ var http = require('http'),
     Promise = require('../lib/pacta');
 
 var get = function (options) {
-    var promise = new Promise();
+    return new Promise(function (resolve, reject) {
+        var request = http.get(options, function (res) {
+            var body = '';
 
-    http.get(options, function (res) {
-        var body = '';
+            res.on('data', function (chunk) {
+                body += chunk;
+            });
 
-        res.on('data', function (chunk) {
-            body += chunk;
+            res.on('end', function () {
+                resolve(body);
+            });
         });
 
-        res.on('end', function () {
-            promise.resolve(body);
+        request.on('error', function (e) {
+            reject(e.message);
         });
     });
-
-    return promise;
 };
 
 var getJSON = function (options) {

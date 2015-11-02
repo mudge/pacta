@@ -8,11 +8,6 @@
  * URL returns a list of "prefixes" and the other returns a list of animal
  * names).
  *
- * Due to the fact two arrays are returned, concatenating the two promises
- * together would join them into one but we actually want to keep them separate
- * so that we can choose a random entry from each.  To do this, we use append to
- * append each promise's value to an empty array.
- *
  * See examples/codenames-2.js for another way to achieve the same result.
  */
 var http = require('./promised-http'),
@@ -22,9 +17,9 @@ var random = function (coll) {
     return coll[Math.floor(Math.random() * coll.length)];
 };
 
-var promisedPrefixes   = http.getJSON('http://codenames.clivemurray.com/data/prefixes.json'),
-    promisedAnimals    = http.getJSON('http://codenames.clivemurray.com/data/animals.json'),
-    prefixesAndAnimals = Promise.of([]).append(promisedPrefixes).append(promisedAnimals);
+var promisedPrefixes = http.getJSON('http://codenames.clivemurray.com/data/prefixes.json'),
+    promisedAnimals = http.getJSON('http://codenames.clivemurray.com/data/animals.json'),
+    prefixesAndAnimals = Promise.all([promisedPrefixes, promisedAnimals]);
 
 var promisedCodeName = function () {
     return prefixesAndAnimals.spread(function (prefixes, animals) {

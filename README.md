@@ -1,17 +1,37 @@
-# pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
+# Pacta [![Build Status](https://travis-ci.org/mudge/pacta.png?branch=master)](https://travis-ci.org/mudge/pacta)
+
+An [algebraic][Fantasy Land] implementation of [ECMAScript 2015][ECMAScript]
+and [Promises/A+][A+] Promises in JavaScript for as many browsers and
+[Node.js](http://nodejs.org) versions as possible.
+
+**Current version:** 0.9.0  
+**Supported Node.js versions:** 0.6, 0.8, 0.10, 0.11, 0.12, 4.0, 4.1, 5.0  
+**Supported browsers:** Internet Explorer 6+, Firefox 3.6+, Chrome 14+, Opera 10.6+, Safari 4+, iOS 3+, Windows Phone 8.1, Android 2.2+
 
 ```javascript
-{ 'pacta': '0.5.1' }
+var promise = new Promise(function (resolve, reject) {
+    setTimeout(function () { resolve('Hello'); }, 5000);
+    setTimeout(function () { reject('Timeout!'); }, 60000);
+});
+
+promise
+    .then(function (value) { return value + ', World!'; })
+    .catch(function (reason) { return 'Sorry'; })
+    .then(console.log); //=> Hello, World!
 ```
 
+## Installation
+
 ```shell
-$ npm install pacta   # for node
+$ npm install pacta   # for Node.js
 $ bower install pacta # for the browser
 ```
 
-This is an implementation of [algebraic][Fantasy Land], [Promises/A+][A+]
-compliant Promises in JavaScript (both for the browser and
-[node.js](http://nodejs.org)).
+Alternatively, include `pacta.js` via a `<script/>` in your page (Pacta also
+supports using an [AMD](https://github.com/amdjs/amdjs-api/blob/master/AMD.md)
+API-compliant loader such as [RequireJS](http://requirejs.org/)).
+
+## Promises
 
 Promises can be thought of as objects representing a value that may not have
 been calculated yet (they are sometimes referred to as `Deferred`s).
@@ -25,39 +45,54 @@ time or sequence of execution.
 At their most basic, an empty promise can be created and resolved like so:
 
 ```javascript
-/* Include pacta.js or require explicitly in node.js: */
 var Promise = require('pacta');
 
-var p = new Promise();
-setTimeout(function () {
-
-  /* Populate the promise with its final value. */
-  p.resolve(1);
-}, 1000);
+var p = new Promise(function (resolve) {
+    setTimeout(function () {
+        /* Populate the promise with its final value. */
+        resolve(1);
+    }, 1000);
+});
 ```
 
 Promises can also be marked as `rejected` (viz. represent an error state) like
 so:
 
 ```javascript
-/* Mark the promise as rejected with a reason. */
-p.reject('The server could not be found.');
+var p = new Promise(function (resolve, reject) {
+    /* Mark the promise as rejected with a reason. */
+    reject('The server could not be found.');
+});
 ```
 
 Concretely, a promise can be represented by the following deterministic finite automaton:
 
 <p align="center"><img src="images/dfa.png" width="275" height="192" alt=""></p>
 
-For a worked example of using promises, see the
-[two](https://github.com/mudge/pacta/blob/master/example/codenames.js)
+For a worked example of using promises, see the [sample HTTP
+client](https://github.com/mudge/pacta/blob/master/example/promised-http.js)
+and [two](https://github.com/mudge/pacta/blob/master/example/codenames.js)
 [example
 programs](https://github.com/mudge/pacta/blob/master/example/codenames-2.js)
-and [sample HTTP
-client](https://github.com/mudge/pacta/blob/master/example/promised-http.js)
 included in Pacta.
 
-Pacta's promises can be used as the following algebraic structures as defined
-in the [Fantasy Land
+### ECMAScript 2015
+
+Pacta's promises comply with the Promise API described in [ECMAScript
+2015][ECMAScript] and the [Promises/A+ specification][A+]:
+
+* [`new Promise(executor)`](#new-promiseexecutor) for constructing, resolving and rejecting promises;
+* [`Promise#then(onFulfilled, onRejected)`](#promisethenonfulfilled-onrejected) for binding callbacks on promise resolution or rejection (compliant with the [Promises/A+ specification][A+]);
+* [`Promise#catch(onRejected)`](#promisecatchonrejected) for dealing with rejected promises;
+* [`Promise.all(iterable)`](#promisealliterable) for returning a promise that is resolved when all of the promises in an iterable resolve, or rejects with the reason of the first rejected promise;
+* [`Promise.race(iterable)`](#promiseraceiterable) for returning a promise that resolves or rejects as soon as one of the promises in an iterable resolves or rejects;
+* [`Promise.reject(reason)`](#promiserejectreason) for constructing rejected promises;
+* [`Promise.resolve(value)`](#promiseresolvevalue) for constructing resolved promises.
+
+### Algebraic JavaScript
+
+The aforementioned high level functions are implemented in terms of the
+algebraic primitives defined in the ["Fantasy Land" Algebraic JavaScript
 Specification][Fantasy Land]:
 
 * [Semigroups](https://github.com/puffnfresh/fantasy-land#semigroup) (through
@@ -74,20 +109,24 @@ Specification][Fantasy Land]:
 * [Monads](https://github.com/puffnfresh/fantasy-land#monad) (through all of
   the above).
 
-Pacta's promises are compliant with the [Promises/A+
-specification](http://promises-aplus.github.io/promises-spec), providing
-a [`then` method](#promisethenonfulfilled-onrejected).
+These different specifications can be thought of as different levels of
+abstraction with ECMAScript 2015 at the top and Fantasy Land at the bottom,
+e.g.
 
-Promises are resolved (or fulfilled) with
-[`Promise#resolve`](#promiseresolvex) and rejected with
-[`Promise#reject`](#promiserejectreason).
+| Specification   | Functions                                                                           |
+| --------------- | ----------------------------------------------------------------------------------- |
+| ECMAScript 2015 | `Promise.all`, `Promise.race`, `Promise.resolve`, `Promise.reject`, `Promise#catch` |
+| Promises/A+     | `Promise#then`                                                                      |
+| Fantasy Land    | `Promise#map`, `Promise#concat`, `Promise#chain`, etc.                              |
 
-To execute code on rejection without using
-[`Promise#then`](#promisethenonfulfilled-onrejected), use
-[`Promise#onRejected`](#promiseonrejectedf).
+Pacta gives you access to all of these functions including the algebraic
+primitives for composition into more expressive operations.
 
-Pacta also provides the following functions for creating and working with
-Promises of lists:
+### Working with lists of promises
+
+As well as the standard [`Promise.all`](#promisealliterable) and
+[`Promise.race`](#promiseraceiterable), Pacta also provides the following
+functions for creating and working with Promises of lists:
 
 * [`Promise#conjoin`](#promiseconjoinp) to concatenate promises into a list of
   values regardless of their original type meaning that non-Monoid types can
@@ -106,9 +145,9 @@ Promises of lists:
   separate arguments:
 
 ```javascript
-Promise.of([1, 2]).spread(function (x, y) {
-  console.log(x); //=> 1
-  console.log(y); //=> 2
+Promise.all([1, 2]).spread(function (x, y) {
+    console.log(x); //=> 1
+    console.log(y); //=> 2
 });
 ```
 
@@ -127,77 +166,218 @@ information.
 [A+]: http://promises-aplus.github.io/promises-spec/
 [Fantasy Land]: https://github.com/puffnfresh/fantasy-land
 [Maybe]: https://en.wikipedia.org/wiki/Monad_(functional_programming)#The_Maybe_monad
-
-## Usage
-
-```javascript
-var Promise = require('pacta');
-
-var p = new Promise();
-setTimeout(function () {
-  p.resolve('Foo');
-}, 1000);
-
-p.map(console.log); //=> "Foo"
-
-p.map(function (x) {
-  return x + '!';
-}).map(console.log); //=> "Foo!"
-
-var p2 = new Promise();
-setTimeout(function () {
-  p2.resolve(['bar']);
-}, 500);
-
-var p3 = Promise.of(['baz']);
-
-p2.concat(p3).map(console.log); //=> [ 'bar', 'baz' ]
-
-p.conjoin(p2).map(console.log); //=> [ 'Foo', 'bar' ]
-
-Promise.of([]).append(p).append(p2).map(console.log);
-//=> [ 'Foo', [ 'bar' ] ]
-
-p2.append(p).spread(function (x, y) {
-  console.log(x); //=> 'bar'
-  console.log(y); //=> 'Foo'
-});
-
-var p4 = new Promise();
-setTimeout(function () {
-  p4.reject('Error!');
-}, 1000);
-
-p4.onRejected(function (reason) {
-  console.error('Failed due to', reason);
-}); //=> Failed due to Error!
-
-p4.then(function (value) {
-  console.log('Success!', value);
-}, function (reason) {
-  console.error('Failure!', reason);
-}); //=> Failure! Error!
-```
+[ECMAScript]: http://www.ecma-international.org/ecma-262/6.0/#sec-promise-objects
 
 ## API Documentation
 
-### `Promise()`
+### `new Promise([executor])`
 
 ```javascript
 var promise = new Promise();
+var promise = new Promise(function (resolve, reject) {
+    if (foo) {
+        resolve('Huzzah!');
+    } else {
+        reject('Oops!');
+    }
+});
 ```
 
 Create a new, unfulfilled promise that will eventually be populated with a
-value (through [`resolve`](#promiseresolvex)).
+value either by an optionally passed `executor` function (which is passed a
+`resolve` and a `reject` function) or by [`Promise#resolve`](#promiseresolvex)
+and [`Promise#reject`](#promiserejectreason-1).
+
+#### See also
+
+* [Promise - JavaScript | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+* [Promise ( executor ) - ECMAScript 2015 Language
+  Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor)
+
+### `Promise#then([onFulfilled[, onRejected]])`
+
+```javascript
+promise.then(function (value) {
+    return x * 2;
+}); //=> Promise.resolve(4)
+
+promise.then(function (value) {
+    return Promise.resolve(x * 2);
+}); //=> Promise.resolve(4)
+
+promise.then(function (value) {
+    console.log('Success!', value);
+}, function (reason) {
+    console.error('Error!', reason);
+});
+```
+
+An implementation of the [Promises/A+ `then`
+method](http://promisesaplus.com/#the__method), taking an
+optional `onFulfilled` and `onRejected` function to call when the promise is
+fulfilled or rejected respectively.
+
+Like [`Promise#map`](#promisemapf), `then` returns a promise itself and can be
+chained.
+
+*Unlike* [`Promise#map`](#promisemapf), `then` will unwrap any promise that is
+returned by an `onFulfilled` or `onRejected` function (making `then` behave
+like [`Promise#chain`](#promisechainf)).
+
+#### See also
+
+* [Promise.prototype.then() - JavaScript | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then)
+* [The `then` Method - Promises/A+](https://promisesaplus.com/#point-21)
+* [Promise.prototype.then ( onFulfilled , onRejected ) - ECMAScript 2015 Language Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.prototype.then)
+
+### `Promise#catch(onRejected)`
+
+```javascript
+promise.catch(function (reason) {
+    console.error('Error!', reason);
+});
+```
+
+An implementation of ECMAScript 2015's `catch` method, equivalent to calling
+[`Promise#then`](#promisethenonfulfilled-onrejected) with an `undefined`
+`onFulfilled`.
+
+*Unlike* [`Promise#onRejected`](#promiseonrejectedf), `catch` will unwrap any
+promises returned from the `onRejected` handler (making `catch` behave like
+[`Promise#chainRejected`](#promisechainrejectedf)).
+
+#### See also
+
+* [Promise.prototype.catch() - JavaScript | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch)
+* [Promise.prototype.catch ( onRejected ) - ECMAScript 2015 Language
+  Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.prototype.catch)
+
+### `Promise.resolve(value)`
+
+```javascript
+var promise = Promise.resolve(5);
+var promise = Promise.resolve(promise);
+var promise = Promise.resolve(thenable);
+```
+
+An implementation of ECMAScript 2015's `Promise.resolve` for returning a
+promise resolved with the given value.
+
+*Unlike* [`Promise.of`](#promiseofx), if the given `value` is itself a promise
+or thenable (viz. a value with a `then` method) then `Promise.resolve` will
+unwrap it, resolving with its eventual state.
+
+Note that this can be used to convert other promise implementations into Pacta
+promises (and is used internally by Pacta to do so).
+
+#### See also
+
+* [Promise.resolve() - JavaScript |
+  MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)
+* [Promise.resolve ( x ) - ECMAScript 2015 Language
+  Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.resolve)
+
+### `Promise.reject(reason)`
+
+```javascript
+var promise = Promise.reject('error!');
+var promise = Promise.reject(new TypeError('Oops!'));
+```
+
+An implementation of ECMAScript 2015's `Promise.reject` for returning a
+promise rejected with a given reason.
+
+#### See also
+
+* [Promise.reject() - JavaScript |
+  MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject)
+* [Promise.reject ( r ) - ECMAScript 2015 Language
+  Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.reject)
+
+### `Promise.all(iterable)`
+
+```javascript
+var promise = new Promise(function (resolve, reject) {
+    setTimeout(function () { resolve('foo'), 1000);
+});
+
+Promise.all(['bar', Promise.resolve(7), promise]).then(function (values) {
+    console.log(values); //=> ['bar', 7, 'foo']
+});
+```
+
+An implementation of ECMAScript 2015's `Promise.all` for returning a promise
+that resolves when all of the promises in a given iterable have resolved or
+rejects with the reason of the first passed promise that rejects.
+
+Note that every element of the given iterable is passed to
+[`Promise.resolve`](#promiseresolvevalue) to coerce it to a Pacta promise
+(this includes other promises, thenables and raw values).
+
+If any promise in the iterable is rejected, the resulting promise will
+instantly reject with that promise's reason, e.g.
+
+```javascript
+var promise = new Promise(function (resolve, reject) {
+    setTimeout(function () { reject('oops!'); }, 500);
+});
+
+Promise.all(['bar', promise]).catch(function (reason) {
+    console.error(reason); //=> 'oops!'
+});
+```
+
+#### See also
+
+* [Promise.all() - JavaScript |
+  MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+* [Promise.all ( iterable ) - ECMAScript 2015 Language
+  Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.all)
+
+### `Promise.race(iterable)`
+
+```javascript
+var p1 = new Promise(function (resolve) {
+        setTimeout(function () { resolve('second'); }, 1000);
+    }),
+    p2 = new Promise(function (resolve) {
+        setTimeout(function () { resolve('first!'); }, 500);
+    });
+
+Promise.race([p1, p2]).then(function (value) {
+    console.log(value); //=> 'first!'
+});
+```
+
+An implementation of ECMAScript 2015's `Promise.race` to return a promise that
+resolves or rejects as soon as one of the promises in the iterable resolves or
+rejects with the value or reason from that promise.
+
+#### See also
+
+* [Promise.race() - JavaScript |
+  MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race)
+* [Promise.race ( iterable ) - ECMAScript 2015 Language
+  Specification](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.race)
 
 ### `Promise.of(x)`
 
 ```javascript
 var promise = Promise.of(1);
 var promise = Promise.of('foo');
+var promise = Promise.of(Promise.of(1));
 ```
 
 Create a new, fulfilled promise already populated with a value `x`.
+
+*Unlike* [`Promise.resolve`](#promiseresolvevalue), `Promise.of` will not unwrap `x`
+if it is a promise or thenable itself so it is possible to created nested
+promises.
+
+#### See also
+
+* [`of` method - Fantasy Land
+  Specification](https://github.com/fantasyland/fantasy-land#of-method)
 
 ### `Promise#resolve(x)`
 
@@ -225,13 +405,13 @@ Mark a promise as rejected, populating it with a reason.
 var promise = Promise.of(2);
 
 promise.map(function (x) {
-  console.log(x);
+    console.log(x);
 
-  return x * 2;
+    return x * 2;
 }); //=> Promise.of(4)
 
 promise.map(function (x) {
-  return Promise.of(x * 2);
+    return Promise.of(x * 2);
 }); //=> Promise.of(Promise.of(4))
 ```
 
@@ -241,7 +421,7 @@ promise containing the result of applying `f` to the initial promise's value.
 In [Haskell](http://www.haskell.org) notation, its type signature is:
 
 ```haskell
-map :: Promise e a -> (a -> b) -> Promise e b
+map :: Promise a -> (a -> b) -> Promise b
 ```
 
 Note that this is the primary way of acting on the value of a promise: you can
@@ -252,57 +432,10 @@ promise.
 Note that any uncaught exceptions during the execution of `f` will result in
 the promise being `rejected` with the exception as its `reason`.
 
-### `Promise#mapError(f)`
+#### See also
 
-```javascript
-var promise = new Promise();
-promise.reject('Type error at line 214');
-
-promise.mapError(function (x) {
-  console.log(x);
-
-  return 'Error: ' + x;
-}); //=> Rejected promise with "Error: Type error at line 214" as reason
-```
-
-Execute a function `f` on the reason of a rejected promise. This returns a new
-rejected promise containing the result of applying `f` to the initial
-promise's reason.
-
-In [Haskell](http://www.haskell.org) notation, its type signature is:
-
-```haskell
-mapError :: Promise e a -> (e -> f) -> Promise f a
-```
-
-Note that any uncaught exceptions during the execution of `f` will result in
-the promise being `rejected` with the exception as its `reason`.
-
-### `Promise#then([onFulfilled[, onRejected]])`
-
-```javascript
-promise.then(function (value) {
-  return x * 2;
-}); //=> Promise.of(4)
-
-promise.then(function (value) {
-  return Promise.of(x * 2);
-}); //=> Promise.of(4)
-
-promise.then(function (value) {
-  console.log('Success!', value);
-}, function (reason) {
-  console.error('Error!', reason);
-});
-```
-
-An implementation of the [Promises/A+ `then`
-method](http://promisesaplus.com/#the__method), taking an
-optional `onFulfilled` and `onRejected` function to call when the promise is
-fulfilled or rejected respectively.
-
-Like [`Promise#map`](#promisemapf), `then` returns a promise itself and can be
-chained.
+* [`map` method - Fantasy Land
+  Specification](https://github.com/fantasyland/fantasy-land#map-method)
 
 ### `Promise#onRejected(f)`
 
@@ -310,7 +443,7 @@ chained.
 var p = new Promise();
 p.reject('Error!');
 p.onRejected(function (reason) {
-  console.error('Failed:', reason);
+    console.error('Failed:', reason);
 });
 ```
 
@@ -325,7 +458,7 @@ var p = new Promise();
 p.reject('Error!');
 
 p.onRejected(function (reason) {
-  return 'Some safe default';
+    return 'Some safe default';
 }).map(console.log);
 //=> Logs "Some safe default"
 ```
@@ -338,10 +471,90 @@ var p = new Promise();
 p.reject('Error!');
 
 p.onRejected(function (reason) {
-  throw 'Another error!';
+    throw 'Another error!';
 }).onRejected(console.log);
 //=> Logs "Another error!"
 ```
+
+### `Promise#chain(f)`
+
+```javascript
+var promise = Promise.of(2);
+
+promise.chain(function (x) { return Promise.of(x * 2); }); //=> Promise.of(4)
+```
+
+Execute a function `f` with the value of the promise. This differs from
+[`Promise#map`](#promisemapf) in that the function *must* return a promise
+itself.
+
+Its type signature is:
+
+```haskell
+chain :: Promise a -> (a -> Promise b) -> Promise b
+```
+
+#### See also
+
+* [`chain` method - Fantasy Land
+  Specification](https://github.com/fantasyland/fantasy-land#chain-method)
+
+### `Promise#chainRejected(f)`
+
+```javascript
+var promise = new Promise(function (resolve, reject) {
+    reject('error!');
+});
+
+promise.chainRejected(function (reason) {
+    return Promise.of('Phew!');
+}); //=> Promise.of('Phew!')
+```
+
+Identical to [`Promise#chain`](#promisechainf) but only executed when a
+promise is rejected rather than resolved.
+
+*This function can also be called as `Promise#chainError`.*
+
+### `Promise#ap(p)`
+
+```javascript
+var promise = Promise.of(function (x) { return x * 2; }),
+    promise2 = Promise.of(2);
+
+promise.ap(promise2); //=> Promise.of(4)
+```
+
+On a promise containing a function, call that function with a promise `p`
+containing a value.
+
+Its type signature is:
+
+```haskell
+ap :: Promise (a -> b) -> Promise a -> Promise b
+```
+
+#### See also
+
+* [`ap` method - Fantasy Land Specification](https://github.com/fantasyland/fantasy-land#ap-method)
+
+### `Promise#empty()`
+
+```javascript
+var promise = Promise.of('woo');
+
+promise.empty(); //=> Promise.of('')
+```
+
+On a promise containing a monoid (viz. something with an `empty()` function on
+itself or its constructor like `Array` or `String`), return a new promise with
+an empty version of the initial value.
+
+(Pacta ships with Monoid implementations for `Array` and `String` by default.)
+
+#### See also
+
+* [`empty` method - Fantasy Land Specification](https://github.com/fantasyland/fantasy-land#empty-method)
 
 ### `Promise#concat(p)`
 
@@ -362,110 +575,19 @@ of joining arrays, etc. applies.
 Its type signature is:
 
 ```haskell
-concat :: Promise e a -> Promise e a -> Promise e a
+concat :: Promise a -> Promise a -> Promise a
 ```
 
 If either of the original two promises is rejected, the resulting concatenated
 promise will also be rejected. Note that only the first rejection will count
 as further rejections will be ignored.
 
-See also [`Promise#conjoin`](#promiseconjoinp) and
-[`Promise#append`](#promiseappendp).
+### See also
 
-### `Promise#chain(f)`
-
-```javascript
-var promise = Promise.of(2);
-
-promise.chain(function (x) { return Promise.of(x * 2); }); //=> Promise.of(4)
-```
-
-Execute a function `f` with the value of the promise. This differs from
-[`Promise#map`](#promisemapf) in that the function *must* return a promise
-itself.
-
-Its type signature is:
-
-```haskell
-chain :: Promise e a -> (a -> Promise e b) -> Promise e b
-```
-
-### `Promise#chainError(f)`
-
-```javascript
-var criticalAjaxCallThatMayFail = function() {
-    var p = new Promise();
-
-    setTimeout(function () {
-        if (Date.now() % 2 === 0) {
-            p.reject('Request timed out');
-        } else {
-            p.resolve('This is a critical sentence.');
-        }
-    }, 2000);
-
-    return p;
-};
-
-var getMessage = function (error) {
-    if (error) {
-        console.error('Error received: ' + error);
-        console.log('Retrying...');
-    }
-
-    console.log('Sending request...');
-    return criticalAjaxCallThatMayFail();
-};
-
-/* Retry 2 times if it fails */
-getMessage()
-    .chainError(getMessage)
-    .chainError(getMessage)
-    .map(console.log)
-    .mapError(console.error);
-```
-
-Execute a function `f` with the reason of a rejected promise. This differs
-from [`Promise#mapError`](#promisemaperrorf) in that the function *must*
-return a promise itself.
-
-Its type signature is:
-
-```haskell
-chainError :: Promise e a -> (e -> Promise f a) -> Promise f a
-```
-
-### `Promise#ap(p)`
-
-```javascript
-var promise = Promise.of(function (x) { return x * 2; }),
-    promise2 = Promise.of(2);
-
-promise.ap(promise2); //=> Promise.of(4)
-```
-
-On a promise containing a function, call that function with a promise `p`
-containing a value.
-
-Its type signature is:
-
-```haskell
-ap :: Promise e (a -> b) -> Promise e a -> Promise e b
-```
-
-### `Promise#empty()`
-
-```javascript
-var promise = Promise.of('woo');
-
-promise.empty(); //=> Promise.of('')
-```
-
-On a promise containing a monoid (viz. something with an `empty()` function on
-itself or its constructor like `Array` or `String`), return a new promise with
-an empty version of the initial value.
-
-(Pacta ships with Monoid implementations for `Array` and `String` by default.)
+* [`Promise#conjoin`](#promiseconjoinp)
+* [`Promise#append`](#promiseappendp)
+* [`concat` method - Fantasy Land
+  Specification](https://github.com/fantasyland/fantasy-land#concat-method)
 
 ### `Promise#conjoin(p)`
 
@@ -506,7 +628,7 @@ would happen with [`Promise#concat`](#promiseconcatp) and
 var promise = Promise.of([1, 2, 3]);
 
 promise.reduce(function (acc, e) {
-  return acc + e;
+    return acc + e;
 }, 0); //=> Promise.of(6)
 ```
 
@@ -522,7 +644,7 @@ underlying signature of `reduce` taking a function `f` and an optional
 var promise = Promise.of([1, 2]);
 
 promise.spread(function (x, y) {
-  return x + y;
+    return x + y;
 }); //=> Promise.of(3)
 ```
 
@@ -550,7 +672,7 @@ specification](https://github.com/puffnfresh/fantasy-land) and
 
 ## License
 
-Copyright © 2013 Paul Mucur.
+Copyright © 2013—2015 Paul Mucur.
 
 Distributed under the MIT License.
 
