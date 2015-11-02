@@ -35,9 +35,33 @@
             return Promise.of(value);
         }
 
+        describe('constructor', function () {
+            it('takes an executor function for resolution', function (done) {
+                var promise = new Promise(function (resolve, reject) {
+                    resolve(1);
+                });
+
+                promise.map(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+
+            it('takes an executor function for rejection', function (done) {
+                var promise = new Promise(function (resolve, reject) {
+                    reject('error');
+                });
+
+                promise.onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+        });
+
         describe('.of', function () {
             it('wraps a value in a new promise', function (done) {
-                fulfilledPromise(1).map(function (x) {
+                Promise.of(1).map(function (x) {
                     assert.equal(1, x);
                     done();
                 });
