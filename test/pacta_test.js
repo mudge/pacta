@@ -168,6 +168,36 @@
             });
         });
 
+        describe('.all', function () {
+            it('waits for all fulfillments', function (done) {
+                var p1 = Promise.resolve(3),
+                    p2 = 1337,
+                    p3 = new Promise(function (resolve) {
+                        setTimeout(function () { resolve('foo'); }, 10);
+                    });
+
+                Promise.all([p1, p2, p3]).then(function (values) {
+                    assert.deepEqual([3, 1337, 'foo'], values);
+                    done();
+                });
+            });
+
+            it('fails fast if one of the elements is rejected', function (done) {
+                var p1 = new Promise(function (resolve) {
+                        setTimeout(function () { resolve('one'); }, 10);
+                    }),
+                    p2 = new Promise(function (resolve) {
+                        setTimeout(function () { resolve('two'); }, 20);
+                    }),
+                    p3 = Promise.reject('reject');
+
+                Promise.all([p1, p2, p3]).onRejected(function (reason) {
+                    assert.equal('reject', reason);
+                    done();
+                });
+            });
+        });
+
         describe('#state', function () {
             it('is pending for unfulfilled and unrejected promises', function () {
                 assert.equal('pending', emptyPromise().state());
