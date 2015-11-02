@@ -210,6 +210,24 @@
             });
         });
 
+        describe('#catch', function () {
+            it('restores the chain after a rejection', function (done) {
+                Promise.resolve('Success').then(function () {
+                    throw 'oh, no!';
+                })['catch'](function (e) {
+                    assert.equal('oh, no!', e);
+                }).then(done);
+            });
+
+            it('restores the chain after a rejected promise', function (done) {
+                Promise.resolve('Success').then(function () {
+                    return Promise.reject('oh, no!');
+                })['catch'](function (e) {
+                    assert.equal('oh, no!', e);
+                }).then(done);
+            });
+        });
+
         describe('#map', function () {
             it('yields the value of the promise', function (done) {
                 fulfilledPromise('foo').map(function (x) {
