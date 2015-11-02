@@ -68,6 +68,15 @@
             });
         });
 
+        describe('.reject', function () {
+            it('wraps a reason in a new promise', function (done) {
+                Promise.reject('error').onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+        });
+
         describe('#state', function () {
             it('is pending for unfulfilled and unrejected promises', function () {
                 assert.equal('pending', emptyPromise().state());
