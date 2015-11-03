@@ -736,7 +736,7 @@
                 var f = function (x) { return rejectedPromise('f(' + x + ')'); },
                     g = function (x) { return rejectedPromise('g(' + x + ')'); };
 
-                rejectedPromise('foo').chainError(f).chainError(g).mapError(function (x) {
+                rejectedPromise('foo').chainError(f).chainError(g).onRejected(function (x) {
                     assert.equal('g(f(foo))', x);
                     done();
                 });
@@ -746,7 +746,7 @@
                 var f = function (x) { return rejectedPromise('f(' + x + ')'); },
                     g = function (x) { return rejectedPromise('g(' + x + ')'); };
 
-                rejectedPromise('foo').chainError(function (x) { return f(x).chainError(g); }).mapError(function (x) {
+                rejectedPromise('foo').chainError(function (x) { return f(x).chainError(g); }).onRejected(function (x) {
                     assert.equal('g(f(foo))', x);
                     done();
                 });
