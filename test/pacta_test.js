@@ -337,6 +337,26 @@
                     done();
                 });
             });
+
+            it('can chain resolved values', function (done) {
+                var p1 = fulfilledPromise(1);
+
+                p1.onRejected(function () { return 'error'; }).map(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+
+            it('can chain asynchronous resolutions', function (done) {
+                var p1 = new Promise(function (resolve) {
+                    setTimeout(function () { resolve(1); }, 10);
+                });
+
+                p1.onRejected(function () { return 'error'; }).map(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
         });
 
         describe('#catch', function () {
@@ -415,6 +435,26 @@
                 p.onRejected(function (r) {
                     assert.equal('rejected', p.state());
                     assert.equal(exception, r);
+                    done();
+                });
+            });
+
+            it('can chain rejected reasons', function (done) {
+                var p = rejectedPromise('error');
+
+                p.map(function () { return 1; }).onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+
+            it('can chain asynchronous rejections', function (done) {
+                var p = new Promise(function (resolve, reject) {
+                    setTimeout(function () { reject('error'); }, 10);
+                });
+
+                p.map(function () { return 1; }).onRejected(function (reason) {
+                    assert.equal('error', reason);
                     done();
                 });
             });
