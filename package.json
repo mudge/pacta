@@ -1,6 +1,6 @@
 {
     "name": "pacta",
-    "description": "An algebraic, Promises/A+ compliant implementation of Promises.",
+    "description": "An algebraic implementation of ECMAScript 2015 and Promises/A+ Promises.",
     "homepage": "https://github.com/mudge/pacta",
     "author": "Paul Mucur (http://mudge.name)",
     "keywords": [
