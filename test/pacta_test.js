@@ -113,7 +113,6 @@
                     promise = Promise.resolve({
                         then: function (resolve) {
                            throw error;
-                           resolve('Resolving');
                         }
                     });
 
