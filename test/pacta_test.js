@@ -35,10 +35,163 @@
             return Promise.of(value);
         }
 
+        describe('constructor', function () {
+            it('takes an executor function for resolution', function (done) {
+                var promise = new Promise(function (resolve, reject) {
+                    resolve(1);
+                });
+
+                promise.map(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+
+            it('takes an executor function for rejection', function (done) {
+                var promise = new Promise(function (resolve, reject) {
+                    reject('error');
+                });
+
+                promise.onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+        });
+
         describe('.of', function () {
             it('wraps a value in a new promise', function (done) {
-                fulfilledPromise(1).map(function (x) {
+                Promise.of(1).map(function (x) {
                     assert.equal(1, x);
+                    done();
+                });
+            });
+        });
+
+        describe('.resolve', function () {
+            it('returns a resolved promise for a value', function (done) {
+                Promise.resolve('Success').then(function (value) {
+                    assert.equal('Success', value);
+                    done();
+                });
+            });
+
+            it('returns a resolved promise for a resolved promise', function (done) {
+                var original = Promise.resolve(true);
+
+                Promise.resolve(original).then(function (v) {
+                    assert.ok(v);
+                    done();
+                });
+            });
+
+            it('converts thenables into Promises', function () {
+                var promise = Promise.resolve({
+                    then: function (resolve) {
+                        resolve('fulfilled!');
+                    }
+                });
+
+                assert.equal(Promise, promise.constructor);
+            });
+
+            it('can resolve converted thenables', function (done) {
+                var promise = Promise.resolve({
+                    then: function (resolve) {
+                        resolve('fulfilled!');
+                    }
+                });
+
+                promise.then(function (v) {
+                    assert.equal('fulfilled!', v);
+                    done();
+                });
+            });
+
+            it('can reject converted thenables', function (done) {
+                var error = new TypeError('Throwing'),
+                    promise = Promise.resolve({
+                        then: function (resolve) {
+                           throw error;
+                        }
+                    });
+
+                promise.then(function () { }, function (e) {
+                    assert.equal(error, e);
+                    done();
+                });
+            });
+        });
+
+        describe('.reject', function () {
+            it('wraps a reason in a new promise', function (done) {
+                Promise.reject('error').onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+        });
+
+        describe('.race', function () {
+            it('returns a promise resolved with the first promise to resolve', function (done) {
+                var p1 = emptyPromise(),
+                    p2 = emptyPromise();
+
+                setTimeout(function () { p1.resolve(1); }, 50);
+                setTimeout(function () { p2.resolve(2); }, 10);
+
+                Promise.race([p1, p2]).then(function (value) {
+                    assert.equal(2, value);
+                    done();
+                });
+            });
+
+            it('returns a promise rejected with the first promise to reject', function (done) {
+                var p1 = emptyPromise(),
+                    p2 = emptyPromise();
+
+                setTimeout(function () { p1.resolve(1); }, 50);
+                setTimeout(function () { p2.reject('error'); }, 10);
+
+                Promise.race([p1, p2]).onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+
+            it('takes an iterable of things that can be resolved to promises', function (done) {
+                Promise.race([1, Promise.resolve(2)]).then(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+        });
+
+        describe('.all', function () {
+            it('waits for all fulfillments', function (done) {
+                var p1 = Promise.resolve(3),
+                    p2 = 1337,
+                    p3 = new Promise(function (resolve) {
+                        setTimeout(function () { resolve('foo'); }, 10);
+                    });
+
+                Promise.all([p1, p2, p3]).then(function (values) {
+                    assert.deepEqual([3, 1337, 'foo'], values);
+                    done();
+                });
+            });
+
+            it('fails fast if one of the elements is rejected', function (done) {
+                var p1 = new Promise(function (resolve) {
+                        setTimeout(function () { resolve('one'); }, 10);
+                    }),
+                    p2 = new Promise(function (resolve) {
+                        setTimeout(function () { resolve('two'); }, 20);
+                    }),
+                    p3 = Promise.reject('reject');
+
+                Promise.all([p1, p2, p3]).onRejected(function (reason) {
+                    assert.equal('reject', reason);
                     done();
                 });
             });
@@ -184,6 +337,44 @@
                     done();
                 });
             });
+
+            it('can chain resolved values', function (done) {
+                var p1 = fulfilledPromise(1);
+
+                p1.onRejected(function () { return 'error'; }).map(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+
+            it('can chain asynchronous resolutions', function (done) {
+                var p1 = new Promise(function (resolve) {
+                    setTimeout(function () { resolve(1); }, 10);
+                });
+
+                p1.onRejected(function () { return 'error'; }).map(function (value) {
+                    assert.equal(1, value);
+                    done();
+                });
+            });
+        });
+
+        describe('#catch', function () {
+            it('restores the chain after a rejection', function (done) {
+                Promise.resolve('Success').then(function () {
+                    throw 'oh, no!';
+                })['catch'](function (e) {
+                    assert.equal('oh, no!', e);
+                }).then(done);
+            });
+
+            it('restores the chain after a rejected promise', function (done) {
+                Promise.resolve('Success').then(function () {
+                    return Promise.reject('oh, no!');
+                })['catch'](function (e) {
+                    assert.equal('oh, no!', e);
+                }).then(done);
+            });
         });
 
         describe('#map', function () {
@@ -244,6 +435,26 @@
                 p.onRejected(function (r) {
                     assert.equal('rejected', p.state());
                     assert.equal(exception, r);
+                    done();
+                });
+            });
+
+            it('can chain rejected reasons', function (done) {
+                var p = rejectedPromise('error');
+
+                p.map(function () { return 1; }).onRejected(function (reason) {
+                    assert.equal('error', reason);
+                    done();
+                });
+            });
+
+            it('can chain asynchronous rejections', function (done) {
+                var p = new Promise(function (resolve, reject) {
+                    setTimeout(function () { reject('error'); }, 10);
+                });
+
+                p.map(function () { return 1; }).onRejected(function (reason) {
+                    assert.equal('error', reason);
                     done();
                 });
             });
@@ -564,7 +775,7 @@
                 var f = function (x) { return rejectedPromise('f(' + x + ')'); },
                     g = function (x) { return rejectedPromise('g(' + x + ')'); };
 
-                rejectedPromise('foo').chainError(f).chainError(g).mapError(function (x) {
+                rejectedPromise('foo').chainError(f).chainError(g).onRejected(function (x) {
                     assert.equal('g(f(foo))', x);
                     done();
                 });
@@ -574,7 +785,7 @@
                 var f = function (x) { return rejectedPromise('f(' + x + ')'); },
                     g = function (x) { return rejectedPromise('g(' + x + ')'); };
 
-                rejectedPromise('foo').chainError(function (x) { return f(x).chainError(g); }).mapError(function (x) {
+                rejectedPromise('foo').chainError(function (x) { return f(x).chainError(g); }).onRejected(function (x) {
                     assert.equal('g(f(foo))', x);
                     done();
                 });

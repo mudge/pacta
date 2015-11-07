@@ -1,0 +1,10 @@
+{
+    "overrides": {
+        "test/pacta_adapter.js": {
+            "node": true
+        },
+        "test/promises_aplus_test.js": {
+            "node": true
+        }
+    }
+}
